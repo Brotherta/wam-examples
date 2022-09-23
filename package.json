@@ -16,7 +16,4 @@
     "url": "https://github.com/Brotherta/wam-examples/issues"
   },
   "homepage": "https://github.com/Brotherta/wam-examples#readme",
-  "dependencies": {
-    "fomantic-ui": "^2.8.8"
-  }
 }
