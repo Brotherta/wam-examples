@@ -1,0 +1,48 @@
+.example {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: 150px;
+}
+
+.example.plugin {
+    height: 520px;
+}
+
+.loading {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.plugins {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: center;
+    width: 500px;
+}
+
+#loading-gif {
+    height: 50px;
+    width: auto;
+}
+
+.section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.wave {
+    height: 100px;
+    width: 600px;
+
+}
+
+canvas {
+    border: 2px solid black;
+    border-radius: 3px;
+}

@@ -1,17 +1,16 @@
-//@ts-check
+import {drawBuffer} from "../lib/utils/drawer.js";
 
 const audioUrl = "https://wasabi.i3s.unice.fr/WebAudioPluginBank/BasketCaseGreendayriffDI.mp3";
 
 const audioCtx = new AudioContext();
-/** @type {HTMLButtonElement} */
-// @ts-ignore
+
 const btnStart = document.getElementById("btn-start");
-/** @type {HTMLInputElement} */
-// @ts-ignore
 const inputLoop = document.getElementById("input-loop");
+const canvas = document.getElementById("canvas1");
+const example = document.getElementById("example");
 
 (async () => {
-    const { default: OperableAudioBuffer } = await import("./operable-audio-buffer.js");
+    const { default: OperableAudioBuffer } = await import("../lib/utils/operable-audio-buffer.js");
     const { default: AudioPlayerNode } = await import("./audio-player-node.js");
     await audioCtx.audioWorklet.addModule("./audio-player-processor.js");
 
@@ -19,9 +18,11 @@ const inputLoop = document.getElementById("input-loop");
     const audioArrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
 
-    /** @type {import("./operable-audio-buffer.js").default} */
+    /** @type {import("../lib/utils/operable-audio-buffer.js").default} */
     const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
     const node = new AudioPlayerNode(audioCtx, 2);
+
+    drawBuffer(canvas, audioBuffer, "blue", 600, 100);
 
     node.setAudio(operableAudioBuffer.toArray());
     node.connect(audioCtx.destination);
@@ -50,5 +51,6 @@ const inputLoop = document.getElementById("input-loop");
             inputLoop.checked = true;
         }
     }
-    btnStart.style.display = "";
+    example.style.display = "";
+    $(".loading").css("display", "none");
 })();

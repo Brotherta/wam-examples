@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Example : Simple JavaScript Web Audio Module 2.0 Processor</title>
-    <link rel="icon" type="image/x-icon" href="../assets/images/wam-logo.png">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="../lib/semantic/dist/semantic.min.css">
     <script src="../lib/semantic/dist/semantic.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="../assets/images/wam-logo.png">
+    <link rel="stylesheet" type="text/css" href="../lib/semantic/dist/semantic.min.css">
+    <link rel="stylesheet" href="../lib/prism/prism.css">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
 </head>
 <body>
 
@@ -27,16 +29,32 @@
     Example : Simple JavaScript Web Audio Module 2.0 Processor
 </h2>
 
-<button id="btn-start" class="ui button" style="display: none">Start</button>
-<input class="ui checkbox" type="checkbox" name="loop" id="input-loop">
-<label for="input-loop">Loop</label>
-
-<div class="plugins" style="display: flex; flex-direction: row;">
-    <div id="mount1"></div>
-    <div id="mount2"></div>
+<div class="loading">
+    <img id="loading-gif" src="../assets/images/circle-loading.gif" alt="loading">
 </div>
 
-</body>
-<script src="./index.js" type="module"></script>
+<div id="example" class="example plugin" style="display: none;">
+    <div class="wave">
+        <canvas id="canvas1"></canvas>
+    </div>
+    <div class="section">
+        <button id="btn-start" class="ui button">Start</button>
+        <div class="ui toggle checkbox">
+            <input type="checkbox" name="loop" id="input-loop">
+            <label>Loop</label>
+        </div>
+    </div>
+    <div class="plugins">
+        <div id="mount1"></div>
+        <div id="mount2"></div>
+    </div>
+</div>
 
+
+
+</body>
+
+
+<script src="./index.js" type="module"></script>
+<script src="../lib/prism/prism.js"></script>
 </html>

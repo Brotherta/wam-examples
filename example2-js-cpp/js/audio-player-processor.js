@@ -1,7 +1,5 @@
-/// <reference path="./types.d.ts" />
 /** @type {AudioWorkletGlobalScope} */
-// @ts-ignore
-const { registerProcessor, sampleRate } = globalThis;
+const {registerProcessor, sampleRate} = globalThis;
 
 const BYTES_PER_SAMPLE = Float32Array.BYTES_PER_ELEMENT;
 
@@ -11,8 +9,17 @@ const MAX_CHANNEL_COUNT = 32;
 // WebAudio's render quantum size.
 const RENDER_QUANTUM_FRAMES = 128;
 
+/**
+ * @class
+ * @extends {AudioWorkletProcessor}
+ *
+ * Class to define custom operations in the audio processor. In this version of the custom
+ * processor, we use a custom processor written in c++.
+ */
 class AudioPlayerProcessor extends AudioWorkletProcessor {
-    /** @type {AudioParamDescriptor[]} */
+    /**
+     * @type {AudioParamDescriptor[]} Give custom parameters of the processor.
+     */
     static get parameterDescriptors() {
         return [{
             name: "playing",
@@ -26,19 +33,29 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
             defaultValue: 0
         }];
     }
+
     /**
      * @param {AudioWorkletNodeOptions} options
      */
     constructor(options) {
         super(options);
-        /** @type {Float32Array[]} */
+        /**
+         * @property {Float32Array[]} audio Audio given by the host.
+         */
         this.audio = null;
-        /** @type {number} */
+        /**
+         * @property {number} playhea Current position in the audio buffer.
+         */
         this.playhead = 0;
+        /**
+         * @property {boolean} ready Boolean to check if WebAssembly Module is ready.
+         */
         this.ready = false;
-        this.once = true;
-        this.cc = 0;
-        /** @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e */
+
+        /**
+         * @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e
+         * Define listeners to handle messages of the host. There we listen for the decoded audio buffer.
+         */
         this.port.onmessage = (e) => {
             if (e.data.audio) {
                 this.audio = e.data.audio;
@@ -52,6 +69,10 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
         };
     }
 
+    /**
+     * @property {Function} setupWasm - Compile and instantiate the WebAssembly Module.
+     * @returns void
+     */
     setupWasm() {
         WebAssembly.instantiate(this.moduleWasm)
             .then(instance => {
@@ -62,6 +83,13 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
             .catch(err => console.log(err));
     }
 
+
+    /**
+     * @property {Function} loadBuffers Create the Shared Heap Audio buffer.
+     * @returns {Promise<void>}
+     *
+     * @description It initialize the buffers that are shared between the C++ and the JavaScript processor.
+     */
     async loadBuffers() {
         this._heapInputBuffer = new HeapAudioBufferInsideProcessor(
             this.instance,
@@ -78,9 +106,14 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
     }
 
     /**
+     * @property {Function} Renderer of the audio buffer. It consumes the quantum block.
+     *
      * @param {Float32Array[][]} inputs
      * @param {Float32Array[][]} outputs
      * @param {Record<string, Float32Array>} parameters
+     *
+     * @description Default value of the quantum frame is 128. JavaScript code fills the Input Heap Audio Buffer,
+     * C++ code fills the Output Heap Audio Buffer. At the end of the process, we copy out the result of the output Heap.
      */
     process(inputs, outputs, parameters) {
         if (!this.audio || !this.ready) return true;
@@ -240,7 +273,7 @@ class HeapAudioBufferInsideProcessor {
             return null;
         }
 
-        return typeof channelIndex === 'undefined'
+        return typeof channelIndex === "undefined"
             ? this._channelData : this._channelData[channelIndex];
     }
 

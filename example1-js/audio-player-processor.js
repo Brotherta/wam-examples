@@ -1,11 +1,16 @@
-/// <reference path="./types.d.ts" />
+/** @type {AudioWorkletGlobalScope}*/
+const {registerProcessor, sampleRate} = globalThis;
 
-/** @type {AudioWorkletGlobalScope} */
-// @ts-ignore
-const { registerProcessor, sampleRate } = globalThis;
-
+/**
+ * @class
+ * @extends {AudioWorkletProcessor}
+ *
+ * Class to define custom operations in the audio processor.
+ */
 class AudioPlayerProcessor extends AudioWorkletProcessor {
-    /** @type {AudioParamDescriptor[]} */
+    /**
+     * @type {AudioParamDescriptor[]} Give custom parameters of the processor.
+     */
     static get parameterDescriptors() {
         return [{
             name: "playing",
@@ -19,35 +24,49 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
             defaultValue: 0
         }];
     }
+
     /**
      * @param {AudioWorkletNodeOptions} options
      */
     constructor(options) {
         super(options);
-        /** @type {Float32Array[]} */
+        /**
+         * @property {Float32Array[]} audio Audio given by the host.
+         */
         this.audio = null;
-        /** @type {number} */
+        /**
+         * @property {number} playhea Current position in the audio buffer.
+         */
         this.playhead = 0;
-        /** @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e */
+        /**
+         * @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e
+         * Define listeners to handle messages of the host. There we listen for the decoded audio buffer.
+         */
         this.port.onmessage = (e) => {
             if (e.data.audio) {
                 this.audio = e.data.audio;
-            } else if (typeof e.data.position === "number") {
-                this.playhead = e.data.position * sampleRate;
             }
         };
     }
+
     /**
+     * @property {Function} Renderer of the audio buffer. It consumes the quantum block.
+     *
      * @param {Float32Array[][]} inputs
      * @param {Float32Array[][]} outputs
      * @param {Record<string, Float32Array>} parameters
+     *
+     * @description Default value of the quantum frame is 128.
      */
     process(inputs, outputs, parameters) {
         if (!this.audio) return true;
+        /** Initializing the buffer with the given outputs and the audioLength.  */
         const bufferSize = outputs[0][0].length;
         const audioLength = this.audio[0].length;
-        /** Only one output is used. */
+
+        /** Only one output is used. Because we use our own Buffer source see {OperableAudioBuffer} */
         const output = outputs[0];
+
         for (let i = 0; i < bufferSize; i++) {
             const playing = !!(i < parameters.playing.length ? parameters.playing[i] : parameters.playing[0]);
             const loop = !!(i < parameters.loop.length ? parameters.loop[i] : parameters.loop[0]);
