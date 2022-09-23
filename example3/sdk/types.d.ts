@@ -1,4 +1,4 @@
-import { WebAudioModule as IWebAudioModule, WamGroup as IWamGroup, WamEventType, WamBinaryData, WamEvent, WamMidiData, WamParameter, WamParameterMap, WamParameterData, WamParameterDataMap, WamParameterInfo, WamParameterInfoMap, WamProcessor as IWamProcessor, WamTransportData, WamNode as IWamNode, WamDescriptor } from '@webaudiomodules/api';
+import { WebAudioModule as IWebAudioModule, WamGroup as IWamGroup, WamEventType, WamBinaryData, WamEvent, WamMidiData, WamParameter, WamParameterMap, WamParameterData, WamParameterDataMap, WamParameterInfo, WamParameterInfoMap, WamProcessor as IWamProcessor, WamTransportData, WamNode as IWamNode, WamDescriptor } from '.';
 
 export interface WamParameterInterpolator {
 	/** Info object for corresponding WamParameter. */

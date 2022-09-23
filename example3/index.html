@@ -5,8 +5,8 @@
     <title>Example : Simple JavaScript Web Audio Module 2.0 Processor</title>
     <link rel="icon" type="image/x-icon" href="../assets/wam-logo.png">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="../semantic/dist/semantic.min.css">
-    <script src="../semantic/dist/semantic.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../lib/semantic/dist/semantic.min.css">
+    <script src="../lib/semantic/dist/semantic.min.js"></script>
 </head>
 <body>
 
@@ -30,7 +30,13 @@
 <button id="btn-start" class="ui button" style="display: none">Start</button>
 <input class="ui checkbox" type="checkbox" name="loop" id="input-loop">
 <label for="input-loop">Loop</label>
-<script src="./index.js"></script>
+
+<div class="plugins" style="display: flex; flex-direction: row;">
+    <div id="mount1"></div>
+    <div id="mount2"></div>
+</div>
 
 </body>
+<script src="./index.js" type="module"></script>
+
 </html>
