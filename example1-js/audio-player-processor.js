@@ -9,7 +9,9 @@ const {registerProcessor, sampleRate} = globalThis;
  */
 class AudioPlayerProcessor extends AudioWorkletProcessor {
     /**
-     * @type {AudioParamDescriptor[]} Give custom parameters of the processor.
+     * @property {Function} parameterDescriptors Get the custom parameters of the processor.
+     *
+     * @returns {AudioParamDescriptor[]}
      */
     static get parameterDescriptors() {
         return [{
@@ -26,6 +28,8 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
     }
 
     /**
+     * @constructor
+     *
      * @param {AudioWorkletNodeOptions} options
      */
     constructor(options) {
@@ -50,7 +54,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
     }
 
     /**
-     * @property {Function} Renderer of the audio buffer. It consumes the quantum block.
+     * @property {Function} process Renderer of the audio buffer. It consumes the quantum block.
      *
      * @param {Float32Array[][]} inputs
      * @param {Float32Array[][]} outputs

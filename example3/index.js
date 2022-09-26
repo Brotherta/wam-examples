@@ -58,6 +58,9 @@ const example = document.getElementById("example");
     mount2.innerHTML = '';
     await mount2.appendChild(pluginDom2);
 
+    /**
+     * Connecting host's logic of the page.
+     */
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") audioCtx.resume();
         const playing = node.parameters.get("playing").value;
