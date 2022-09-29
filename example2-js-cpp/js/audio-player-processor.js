@@ -66,12 +66,8 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
                 this.audio = e.data.audio;
             } else if (typeof e.data.position === "number") {
                 this.playhead = e.data.position * sampleRate;
-            } else if (e.data.moduleWasm) {
-                this.moduleWasm = e.data.moduleWasm;
-                this.setupWasm(options)
             }
         };
-        // console.log(typeof options.processorOptions.moduleWasm)
         this.setupWasm(options);
     }
 

@@ -2,6 +2,12 @@ import {addFunctionModule, WamNode} from "./sdk/index.js";
 import {audioCtx} from "./index.js";
 import getProcessor from "./wam-audio-player-processor.js";
 
+/**
+ * @class
+ * @extends WamNode
+ *
+ * Class that extends WamNode, use to add our own processor, (see getProcessor).
+ */
 export default class MyWamNode extends WamNode {
 
     static async addModules(moduleId) {
@@ -12,11 +18,6 @@ export default class MyWamNode extends WamNode {
 
     constructor(module, options) {
         super(module, options);
-        // this._supportedEventTypes = new Set(['wam-automation']);
-    }
-
-    async _onMessage(e) {
-        await super._onMessage(e);
     }
 
     /**
@@ -24,9 +25,5 @@ export default class MyWamNode extends WamNode {
      */
     setAudio(audio) {
         this.port.postMessage({ audio });
-    }
-    /** @param {number} position set playhead in seconds */
-    setPosition(position) {
-        this.port.postMessage({ position });
     }
 }

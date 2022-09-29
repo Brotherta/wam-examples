@@ -27,10 +27,6 @@ class AudioPlayerNode extends AudioWorkletNode {
             }
 
         });
-
-        /** Send Web Assembly Module to the custom processor. */
-
-        this.setWasm(moduleWasm);
     }
 
     /**
@@ -41,17 +37,6 @@ class AudioPlayerNode extends AudioWorkletNode {
     setAudio(audio) {
         console.log("sending audio");
         this.port.postMessage({audio});
-    }
-
-    /**
-     * @property {Function} setWasm Sends the Web Assembly Module to the processor in the audio thread.
-     *
-     * @param {WebAssembly.Module} moduleWasm Web Assembly Module fetched by the host.
-     */
-    setWasm(moduleWasm) {
-        console.log("sending module")
-
-        this.port.postMessage({moduleWasm});
     }
 }
 

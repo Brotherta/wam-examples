@@ -53,7 +53,7 @@ async function loadWasm() {
     node.parameters.get("loop").value = 1;
 
     /**
-     * Connecting host's logic of the page.
+     * Connecting host's logic of the host page.
      */
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") audioCtx.resume();
