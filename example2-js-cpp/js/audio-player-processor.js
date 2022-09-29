@@ -1,4 +1,5 @@
 /** @type {AudioWorkletGlobalScope} */
+
 const {registerProcessor, sampleRate} = globalThis;
 
 const BYTES_PER_SAMPLE = Float32Array.BYTES_PER_ELEMENT;
@@ -18,7 +19,9 @@ const RENDER_QUANTUM_FRAMES = 128;
  */
 class AudioPlayerProcessor extends AudioWorkletProcessor {
     /**
-     * @type {AudioParamDescriptor[]} Give custom parameters of the processor.
+     * @property {Function} parameterDescriptors Get the custom parameters of the processor.
+     *
+     * @returns {AudioParamDescriptor[]}
      */
     static get parameterDescriptors() {
         return [{
@@ -35,6 +38,8 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
     }
 
     /**
+     * @constructor
+     *
      * @param {AudioWorkletNodeOptions} options
      */
     constructor(options) {
@@ -64,31 +69,39 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
             } else if (e.data.moduleWasm) {
                 this.moduleWasm = e.data.moduleWasm;
                 this.setupWasm(options)
-                this.ready = true;
             }
         };
+        // console.log(typeof options.processorOptions.moduleWasm)
+        this.setupWasm(options);
     }
 
+
     /**
-     * @property {Function} setupWasm - Compile and instantiate the WebAssembly Module.
+     * @property {Function} setupWasm Compiles and instantiates the WebAssembly Module.
      * @returns void
      */
-    setupWasm() {
-        WebAssembly.instantiate(this.moduleWasm)
+    setupWasm(options) {
+
+        /**
+         * Need to use the AudioWorkletProcessorsOptions to access the custom properties.
+         */
+        WebAssembly.instantiate(options.processorOptions.moduleWasm)
             .then(instance => {
+                console.log(instance);
                 this.instance = instance.exports;
                 this._processPerf = this.instance.processPerf;
                 this.loadBuffers();
+                this.ready = true;
             })
             .catch(err => console.log(err));
     }
 
 
     /**
-     * @property {Function} loadBuffers Create the Shared Heap Audio buffer.
+     * @property {Function} loadBuffers Creates the shared heap audio buffer.
      * @returns {Promise<void>}
      *
-     * @description It initialize the buffers that are shared between the C++ and the JavaScript processor.
+     * @description It initialize the buffers that are shared between the C++ code and the JavaScript processor.
      */
     async loadBuffers() {
         this._heapInputBuffer = new HeapAudioBufferInsideProcessor(
@@ -106,7 +119,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
     }
 
     /**
-     * @property {Function} Renderer of the audio buffer. It consumes the quantum block.
+     * @property {Function} process Renderer of the audio buffer. It consumes the quantum block.
      *
      * @param {Float32Array[][]} inputs
      * @param {Float32Array[][]} outputs
@@ -117,7 +130,6 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
      */
     process(inputs, outputs, parameters) {
         if (!this.audio || !this.ready) return true;
-
         let input = [];
         let output = outputs[0];
         let channelCount = this.audio.length;

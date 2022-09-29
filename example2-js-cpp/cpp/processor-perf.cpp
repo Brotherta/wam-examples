@@ -3,6 +3,11 @@
 
 using namespace emscripten;
 
+/**
+* Function to demonstrates how to use C++ code in javascript. This function is only copying the content of the input buffer,
+* into the output buffer.
+*/
+
 extern "C" {
 
     int processPerf(uintptr_t input_ptr, uintptr_t output_ptr, int channel_count) {

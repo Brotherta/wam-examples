@@ -8,34 +8,53 @@ const inputLoop = document.getElementById("input-loop");
 const canvas = document.getElementById("canvas1");
 const example = document.getElementById("example");
 
-var moduleWasm;
+let moduleWasm;
 
+/**
+ * Fetch and load the Web Assembly.
+ * @return {Promise<void>}
+ */
 async function loadWasm() {
     WebAssembly.compileStreaming(fetch("./ProcessWasm.wasm"))
         .then(module => moduleWasm = module);
 }
 
+/**
+ * Self-invoking asynchronous function to initialize the host.
+ */
 (async () => {
     await loadWasm();
-
     const { default: OperableAudioBuffer } = await import("../lib/utils/operable-audio-buffer.js");
     const { default: AudioPlayerNode } = await import("./js/audio-player-node.js");
+    /**
+     * Register our custom JavaScript processor in the current audio worklet.
+     */
     await audioCtx.audioWorklet.addModule("./js/audio-player-processor.js");
 
     const response = await fetch(audioUrl);
     const audioArrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
 
+    /** @type {import("../lib/utils/operable-audio-buffer.js").default}
+     * Transform the audio buffer in a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example editing...)
+     */
     const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
     const node = new AudioPlayerNode(audioCtx, 2, moduleWasm);
 
+    /** Draw the waveform in the canvas. */
     drawBuffer(canvas, audioBuffer, "blue", 600, 100);
 
+    /**
+     * Sending audio to the processor and connecting the node to the output destination.
+     */
     node.setAudio(operableAudioBuffer.toArray());
     node.connect(audioCtx.destination);
     node.parameters.get("playing").value = 0;
     node.parameters.get("loop").value = 1;
 
+    /**
+     * Connecting host's logic of the page.
+     */
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") audioCtx.resume();
         const playing = node.parameters.get("playing").value;
@@ -59,5 +78,5 @@ async function loadWasm() {
         }
     }
     example.style.display = "";
-    $(".loading").css("display", "none");
+    document.querySelector(".loading").style.display = "none";
 })();
