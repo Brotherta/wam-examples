@@ -78,5 +78,5 @@ async function loadWasm() {
         }
     }
     example.style.display = "";
-    $(".loading").css("display", "none");
+    document.querySelector(".loading").style.display = "none";
 })();

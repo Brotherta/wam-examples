@@ -21,7 +21,11 @@ class AudioPlayerNode extends AudioWorkletNode {
         super(context, "audio-player-processor", {
             numberOfInputs: 0,
             numberOfOutputs: 2,
-            channelCount
+            channelCount,
+            processorOptions: {
+                moduleWasm
+            }
+
         });
 
         /** Send Web Assembly Module to the custom processor. */
@@ -35,6 +39,7 @@ class AudioPlayerNode extends AudioWorkletNode {
      * @param {Float32Array[]} audio Audio Buffer to be transferred to the processor in the audio to process.
      */
     setAudio(audio) {
+        console.log("sending audio");
         this.port.postMessage({audio});
     }
 
@@ -44,7 +49,8 @@ class AudioPlayerNode extends AudioWorkletNode {
      * @param {WebAssembly.Module} moduleWasm Web Assembly Module fetched by the host.
      */
     setWasm(moduleWasm) {
-        console.log("test");
+        console.log("sending module")
+
         this.port.postMessage({moduleWasm});
     }
 }

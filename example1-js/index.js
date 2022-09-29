@@ -1,6 +1,5 @@
 import {drawBuffer} from "../lib/utils/drawer.js";
-
-const audioUrl = "https://wasabi.i3s.unice.fr/WebAudioPluginBank/BasketCaseGreendayriffDI.mp3";
+const audioUrl = "../assets/audio/BasketCaseGreendayriffDI.mp3";
 
 const audioCtx = new AudioContext();
 
@@ -25,7 +24,7 @@ const example = document.getElementById("example");
     const audioArrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
 
-    /** @type {import("../lib/utils/operable-audio-buffer.js").default}
+    /**
      * Transform the audio buffer in a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example editing...)
      */
     const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
@@ -68,5 +67,5 @@ const example = document.getElementById("example");
         }
     }
     example.style.display = "";
-    $(".loading").css("display", "none");
+    document.querySelector(".loading").style.display = "none";
 })();

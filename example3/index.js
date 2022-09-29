@@ -5,11 +5,7 @@ const plugin1Url = "https://mainline.i3s.unice.fr/wam2/packages/StonePhaserStere
 const plugin2Url = "https://mainline.i3s.unice.fr/wam2/packages/BigMuff/index.js";
 
 export const audioCtx = new AudioContext();
-/** @type {HTMLButtonElement} */
-// @ts-ignore
 const btnStart = document.getElementById("btn-start");
-/** @type {HTMLInputElement} */
-// @ts-ignore
 const inputLoop = document.getElementById("input-loop");
 const canvas = document.getElementById("canvas1");
 const example = document.getElementById("example");
@@ -84,5 +80,5 @@ const example = document.getElementById("example");
         }
     }
     example.style.display = "";
-    $(".loading").css("display", "none");
+    document.querySelector(".loading").style.display = "none";
 })();

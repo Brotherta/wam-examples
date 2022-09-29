@@ -62,7 +62,6 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
          * Define listeners to handle messages of the host. There we listen for the decoded audio buffer.
          */
         this.port.onmessage = (e) => {
-            console.log("message received :", e.data);
             if (e.data.audio) {
                 this.audio = e.data.audio;
             } else if (typeof e.data.position === "number") {
@@ -70,22 +69,29 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
             } else if (e.data.moduleWasm) {
                 this.moduleWasm = e.data.moduleWasm;
                 this.setupWasm(options)
-                this.ready = true;
             }
         };
+        // console.log(typeof options.processorOptions.moduleWasm)
+        this.setupWasm(options);
     }
+
 
     /**
      * @property {Function} setupWasm Compiles and instantiates the WebAssembly Module.
      * @returns void
      */
-    setupWasm() {
+    setupWasm(options) {
 
-        WebAssembly.instantiate(this.moduleWasm)
+        /**
+         * Need to use the AudioWorkletProcessorsOptions to access the custom properties.
+         */
+        WebAssembly.instantiate(options.processorOptions.moduleWasm)
             .then(instance => {
+                console.log(instance);
                 this.instance = instance.exports;
                 this._processPerf = this.instance.processPerf;
                 this.loadBuffers();
+                this.ready = true;
             })
             .catch(err => console.log(err));
     }

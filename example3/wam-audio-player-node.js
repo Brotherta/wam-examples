@@ -12,7 +12,7 @@ export default class MyWamNode extends WamNode {
 
     constructor(module, options) {
         super(module, options);
-        this._supportedEventTypes = new Set(['wam-automation']);
+        // this._supportedEventTypes = new Set(['wam-automation']);
     }
 
     async _onMessage(e) {
