@@ -64,11 +64,12 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
      */
     process(inputs, outputs, parameters) {
         if (!this.audio) return true;
-        /** Initializing the buffer with the given outputs and the audioLength.  */
+
+        // Initializing the buffer with the given outputs and the audio length.
         const bufferSize = outputs[0][0].length;
         const audioLength = this.audio[0].length;
 
-        /** Only one output is used. Because we use our own Buffer source see {OperableAudioBuffer} */
+        // Only one output is used. Because we use our buffer source see {OperableAudioBuffer}
         const output = outputs[0];
 
         for (let i = 0; i < bufferSize; i++) {

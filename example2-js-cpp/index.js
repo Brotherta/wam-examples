@@ -1,4 +1,5 @@
 import {drawBuffer} from "../lib/utils/drawer.js";
+
 const audioUrl = "../assets/audio/BasketCaseGreendayriffDI.mp3";
 
 const audioCtx = new AudioContext();
@@ -11,7 +12,7 @@ const example = document.getElementById("example");
 let moduleWasm;
 
 /**
- * Fetch and load the Web Assembly.
+ * Fetches and loads the Web Assembly.
  * @return {Promise<void>}
  */
 async function loadWasm() {
@@ -24,11 +25,10 @@ async function loadWasm() {
  */
 (async () => {
     await loadWasm();
-    const { default: OperableAudioBuffer } = await import("../lib/utils/operable-audio-buffer.js");
-    const { default: AudioPlayerNode } = await import("./js/audio-player-node.js");
-    /**
-     * Register our custom JavaScript processor in the current audio worklet.
-     */
+    const {default: OperableAudioBuffer} = await import("../lib/utils/operable-audio-buffer.js");
+    const {default: AudioPlayerNode} = await import("./js/audio-player-node.js");
+
+    //Register our custom JavaScript processor in the current audio worklet.
     await audioCtx.audioWorklet.addModule("./js/audio-player-processor.js");
 
     const response = await fetch(audioUrl);
@@ -36,25 +36,21 @@ async function loadWasm() {
     const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
 
     /** @type {import("../lib/utils/operable-audio-buffer.js").default}
-     * Transform the audio buffer in a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example editing...)
+     * Transforms the audio buffer in a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example, editing...)
      */
     const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
     const node = new AudioPlayerNode(audioCtx, 2, moduleWasm);
 
-    /** Draw the waveform in the canvas. */
+    // Draw the waveform in the canvas.
     drawBuffer(canvas, audioBuffer, "blue", 600, 100);
 
-    /**
-     * Sending audio to the processor and connecting the node to the output destination.
-     */
+    // Sending audio to the processor and connecting the node to the output destination.
     node.setAudio(operableAudioBuffer.toArray());
     node.connect(audioCtx.destination);
     node.parameters.get("playing").value = 0;
     node.parameters.get("loop").value = 1;
 
-    /**
-     * Connecting host's logic of the host page.
-     */
+    // Connecting host's logic of the host page.
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") audioCtx.resume();
         const playing = node.parameters.get("playing").value;

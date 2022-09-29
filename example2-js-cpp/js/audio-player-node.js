@@ -2,7 +2,7 @@
  * @class
  * @extends {AudioWorkletNode}
  * Class to extend the default built-in AudioWorkletNode.
- * It is important to override the class to defines our own Processor - See {AudioPlayerProcessor}
+ * It is important to override the class to define our Processor - See {AudioPlayerProcessor}
  * This version will use a C++ Processors compiled in a Web Assembly module with Emscriptem.
  */
 class AudioPlayerNode extends AudioWorkletNode {
@@ -10,7 +10,7 @@ class AudioPlayerNode extends AudioWorkletNode {
      * @constructor
      *
      * @param {BaseAudioContext} context  Audio context of the host
-     * @param {number} channelCount Number of channel in the host
+     * @param {number} channelCount Number of channels in the host
      * @param {WebAssembly.Module} moduleWasm Web Assembly Module pre-compiled.
      */
     constructor(context, channelCount, moduleWasm) {

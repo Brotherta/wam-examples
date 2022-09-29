@@ -15,19 +15,15 @@ const example = document.getElementById("example");
  * Self-invoking asynchronous function to initialize the host.
  */
 (async () => {
-    /**
-     * Import from the Web Audio Modules 2.0 SDK to initialize Wam Host.
-     * It initializes a unique ID for the current AudioContext.
-     */
-    const { default: initializeWamHost } = await import('./sdk/initializeWamHost.js');
+    /* Import from the Web Audio Modules 2.0 SDK to initialize Wam Host.
+    It initializes a unique ID for the current AudioContext. */
+    const {default: initializeWamHost} = await import("./sdk/initializeWamHost.js");
     const [hostGroupId] = await initializeWamHost(audioCtx);
 
-    /**
-     * Import our custom WAM Processor and the plugins.
-     */
-    const { default: MyWam } = await import('./my-wam.js');
-    const { default: WAM1 } = await import(plugin1Url);
-    const { default: WAM2 } = await import(plugin2Url);
+    // Import our custom WAM Processor and the plugins.
+    const {default: MyWam} = await import("./my-wam.js");
+    const {default: WAM1} = await import(plugin1Url);
+    const {default: WAM2} = await import(plugin2Url);
 
     /**
      * Create an instance of our Processor. We can get from the instance the audio node.
@@ -40,7 +36,7 @@ const example = document.getElementById("example");
     /** @type {import("../lib/utils/operable-audio-buffer.js").default}
      * Transform the audio buffer in a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example editing...)
      */
-    const { default: OperableAudioBuffer } = await import("../lib/utils/operable-audio-buffer.js");
+    const {default: OperableAudioBuffer} = await import("../lib/utils/operable-audio-buffer.js");
 
     const response = await fetch(audioUrl);
     const audioArrayBuffer = await response.arrayBuffer();
@@ -48,9 +44,8 @@ const example = document.getElementById("example");
     /** @type {import("../lib/utils/operable-audio-buffer.js").default} */
     const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
 
-    /** Draw the waveform in the canvas. */
+    // Draw the waveform in the canvas.
     drawBuffer(canvas, audioBuffer, "blue", 600, 100);
-
 
     /**
      * Create the Instance of the WAM plugins.
@@ -62,9 +57,7 @@ const example = document.getElementById("example");
     let pluginInstance2 = await WAM2.createInstance(hostGroupId, audioCtx);
     let pluginDom2 = await pluginInstance2.createGui();
 
-    /**
-     * Sending audio to the processor and connecting the node to the output destination.
-     */
+    // Sending audio to the processor and connecting the node to the output destination.
     node.setAudio(operableAudioBuffer.toArray());
     node.connect(pluginInstance1._audioNode).connect(pluginInstance2._audioNode).connect(audioCtx.destination);
     node.parameters.get("playing").value = 0;
@@ -75,16 +68,14 @@ const example = document.getElementById("example");
      * @type {Element}
      */
     let mount1 = document.querySelector("#mount1");
-    mount1.innerHTML = '';
+    mount1.innerHTML = "";
     await mount1.appendChild(pluginDom1);
 
     let mount2 = document.querySelector("#mount2");
-    mount2.innerHTML = '';
+    mount2.innerHTML = "";
     await mount2.appendChild(pluginDom2);
 
-    /**
-     * Connecting host's logic of the page.
-     */
+    // Connecting host's logic of the page.
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") audioCtx.resume();
         const playing = node.parameters.get("playing").value;

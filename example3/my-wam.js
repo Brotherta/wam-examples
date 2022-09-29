@@ -1,4 +1,4 @@
-import { WebAudioModule } from "./sdk/index.js";
+import {WebAudioModule} from "./sdk/index.js";
 import MyWamNode from "./wam-audio-player-node.js";
 
 /**
@@ -10,7 +10,6 @@ import MyWamNode from "./wam-audio-player-node.js";
 export default class MyWam extends WebAudioModule {
     /**
      * @property {Function} createAudioNode Create the
-     * @async
      * @override
      * @param initialState
      * @return {Promise<MyWamNode>}
@@ -19,9 +18,7 @@ export default class MyWam extends WebAudioModule {
         await MyWamNode.addModules(this.moduleId);
         const node = new MyWamNode(this);
 
-        /**
-         * Initialize the node audio node. Register the processor in the audio context and the WAM group.
-         */
+        // Initialize the node audio node. Register the processor in the audio context and the WAM group.
         node._initialize();
         return node;
     }

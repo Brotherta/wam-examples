@@ -1,4 +1,5 @@
 import {drawBuffer} from "../lib/utils/drawer.js";
+
 const audioUrl = "../assets/audio/BasketCaseGreendayriffDI.mp3";
 
 const audioCtx = new AudioContext();
@@ -13,37 +14,30 @@ const example = document.getElementById("example");
  * Self-invoking asynchronous function to initialize the host.
  */
 (async () => {
-    const { default: OperableAudioBuffer } = await import("../lib/utils/operable-audio-buffer.js");
-    const { default: AudioPlayerNode } = await import("./audio-player-node.js");
-    /**
-     * Register our custom JavaScript processor in the current audio worklet.
-     */
+    const {default: OperableAudioBuffer} = await import("../lib/utils/operable-audio-buffer.js");
+    const {default: AudioPlayerNode} = await import("./audio-player-node.js");
+
+    // Register our custom JavaScript processor in the current audio worklet.
     await audioCtx.audioWorklet.addModule("./audio-player-processor.js");
 
     const response = await fetch(audioUrl);
     const audioArrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
 
-    /**
-     * Transform the audio buffer in a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example editing...)
-     */
+    //Transform the audio buffer into a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example, editing...)
     const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
     const node = new AudioPlayerNode(audioCtx, 2);
 
-    /** Draw the waveform in the canvas. */
+    // Draw the waveform in the canvas.
     drawBuffer(canvas, audioBuffer, "blue", 600, 100);
 
-    /**
-     * Sending audio to the processor and connecting the node to the output destination.
-     */
+    //Sending audio to the processor and connecting the node to the output destination.
     node.setAudio(operableAudioBuffer.toArray());
     node.connect(audioCtx.destination);
     node.parameters.get("playing").value = 0;
     node.parameters.get("loop").value = 1;
 
-    /**
-     * Connecting host's logic of the page.
-     */
+    // Connecting host's logic of the page.
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") audioCtx.resume();
         const playing = node.parameters.get("playing").value;

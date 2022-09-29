@@ -74,9 +74,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
      */
     setupWasm(options) {
 
-        /**
-         * Need to use the AudioWorkletProcessorsOptions to access the custom properties.
-         */
+        // Need to use the AudioWorkletProcessorsOptions to access the custom properties.
         WebAssembly.instantiate(options.processorOptions.moduleWasm)
             .then(instance => {
                 this.instance = instance.exports;
@@ -91,7 +89,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
      * @property {Function} loadBuffers Creates the shared heap audio buffer.
      * @returns {Promise<void>}
      *
-     * @description It initialize the buffers that are shared between the C++ code and the JavaScript processor.
+     * @description It initializes the buffers that are shared between the C++ code and the JavaScript processor.
      */
     async loadBuffers() {
         this._heapInputBuffer = new HeapAudioBufferInsideProcessor(
@@ -115,8 +113,8 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
      * @param {Float32Array[][]} outputs
      * @param {Record<string, Float32Array>} parameters
      *
-     * @description Default value of the quantum frame is 128. JavaScript code fills the Input Heap Audio Buffer,
-     * C++ code fills the Output Heap Audio Buffer. At the end of the process, we copy out the result of the output Heap.
+     * @description Default value of the quantum frame is 128. On one hand, JavaScript's code fills the Input Heap Audio Buffer, in another hand,
+     * C++'s code fills the Output Heap Audio Buffer. At the end of the process, we copy out the result of the output Heap.
      */
     process(inputs, outputs, parameters) {
         if (!this.audio) return true;
@@ -125,8 +123,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
         let channelCount = this.audio.length;
         const channelCountMin = Math.min(this.audio.length, output.length);
 
-        // Slice the global audio with a RENDER_QUANTUM_FRAMES
-        // to send the input to output by block of 128
+        // Slices the global audio with a RENDER_QUANTUM_FRAME to send the input to output by block of 128.
         for (let i = 0; i < channelCount; i++) {
             input.push(
                 this.audio[i].slice(
@@ -139,14 +136,14 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
         this._heapInputBuffer.adaptChannel(channelCount);
         this._heapOutputBuffer.adaptChannel(channelCount);
 
-        // Copy-in the current block
+        // Copy-in the current block.
         for (let channel = 0; channel < channelCount; ++channel) {
             this._heapInputBuffer.getChannelData(channel).set(input[channel]);
         }
 
         const bufferSize = outputs[0][0].length;
         const audioLength = this.audio[0].length;
-        /** Only one output is used. */
+
         for (let i = 0; i < bufferSize; i++) {
             const playing = !!(i < parameters.playing.length ? parameters.playing[i] : parameters.playing[0]);
             const loop = !!(i < parameters.loop.length ? parameters.loop[i] : parameters.loop[0]);
@@ -156,12 +153,14 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
                 else continue; // EOF without loop
             }
 
+            // Call C++ function _processPerf.
             let returnCode = this._processPerf(
                 this._heapInputBuffer.getHeapAddress(),
                 this._heapOutputBuffer.getHeapAddress(),
                 channelCount
             );
-            // Copy-out the current block
+
+            // Copy-out the current block.
             for (let channel = 0; channel < channelCountMin; ++channel) {
                 output[channel].set(
                     this._heapOutputBuffer.getChannelData(channel)
@@ -270,7 +269,6 @@ class HeapAudioBufferInsideProcessor {
      * array of channel data.
      */
     getChannelData(channelIndex) {
-        // console.log(this._channelData);
         if (channelIndex >= this._channelCount) {
             return null;
         }
@@ -284,7 +282,6 @@ class HeapAudioBufferInsideProcessor {
     }
 
     setChannelOutputData(output, channelIndex) {
-        // let output =
         output = this._channelData[channelIndex];
     }
 

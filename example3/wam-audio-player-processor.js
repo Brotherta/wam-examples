@@ -1,6 +1,6 @@
 /**
  * Function to get the processor. We need it as it is for later when we will add the processor to the AudioWorklet.
- * We will take the function, stringify it and inject to the AudioWorklet with parameters.
+ * We will take the function, stringify it and inject into the AudioWorklet with parameters.
  *
  * @param moduleId
  * @return {MyWamProcessor}
@@ -8,7 +8,6 @@
 
 const getProcessor = (moduleId) => {
     /** @type {AudioWorkletGlobalScope} */
-        // @ts-ignore
     const audioWorkletGlobalScope = globalThis;
     const {registerProcessor} = audioWorkletGlobalScope;
 
@@ -18,7 +17,7 @@ const getProcessor = (moduleId) => {
      * @class
      *
      * Class of our custom processor implementing WAM standard. In this example, the processor doesn't provide any new features
-     * and doesn't take advantage of the Web Audio Module SDK. It will in a later example with plugins and plugin's parameters.
+     * and doesn't take advantage of the Web Audio Module SDK. It will be in a later example with plugins and the plugin's parameters.
      */
     class MyWamProcessor extends ModuleScope.WamProcessor {
         static get parameterDescriptors() {
@@ -34,6 +33,7 @@ const getProcessor = (moduleId) => {
                 defaultValue: 0
             }];
         }
+
         /**
          * @param {AudioWorkletNodeOptions} options
          */
@@ -66,7 +66,8 @@ const getProcessor = (moduleId) => {
             if (!this.audio) return true;
             const bufferSize = outputs[0][0].length;
             const audioLength = this.audio[0].length;
-            /** Only one output is used. */
+
+            // Only one output is used.
             const output = outputs[0];
             for (let i = 0; i < bufferSize; i++) {
                 const playing = !!(i < parameters.playing.length ? parameters.playing[i] : parameters.playing[0]);
