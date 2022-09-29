@@ -7,7 +7,6 @@
 class AudioPlayerNode extends AudioWorkletNode {
     /**
      * @constructor
-     *
      * @param {BaseAudioContext} context  Audio context of the host.
      * @param {number} channelCount Number of channels in the host.
      */
