@@ -6,9 +6,9 @@
 <h3 align="center">Web Audio Modules Examples</h3>
 
 <p align="center">
-Simple step-by-step example of web audio host. <br> 
-It shows how to customize your audio processor with multiple workflow. <br>
-Using JavaScript, C++ or Web Audio Modules.
+Simple step-by-step example of a web audio host. <br> 
+It shows how to customize your audio processor with multiple workflows. <br>
+Using JavaScript, C++, or Web Audio Modules.
 
 <br>
 <a href="https://www.webaudiomodules.org/">Web Audio Modules</a>
@@ -35,36 +35,36 @@ Using JavaScript, C++ or Web Audio Modules.
 
 ### Audio Source
 
-To start with, all the examples below, uses the same audio source. 
-To manipulate the audio buffer as we want, we transform the audio buffer source in a custom audio buffer, see [OperableAudioBuffer](./lib/utils/operable-audio-buffer.js).
+To start with, all the examples below use the same audio source.
+To manipulate the audio buffer as we want, we transform the audio buffer source into a custom audio buffer, see [OperableAudioBuffer](./lib/utils/operable-audio-buffer.js).
 This is not mandatory for the examples, but it's more convenient.
 
 ### Audio Node
 
-In all the examples, we will use our own AudioNode. It is not mandatory to create a custom audio node.
-However, for clarity reasons to keep index.js readable we create an Audio Node.
+In all the examples, we will use our AudioNode. It is not mandatory to create a custom audio node.
+However, for clarity reasons to keep index.js readable, we create an Audio Node.
 
-## Example : Simple JavaScript processor
+## Example: Simple JavaScript processor
 
 This first example uses a simple audio worklet processor written in pure javascript.
 We can customize the processor by using the Web Audio API.
 
 ### Audio Processor
 
-The code of the processor is not particular in any manners. See the [AudioProcessor](example1-js/audio-player-processor.js).
+The code of the processor is not particular in any manner. See the [AudioProcessor](example1-js/audio-player-processor.js).
 The process function, copy the buffer source input to the output. For all the channels described in the processor.
 The processor will handle the loop. At any moment of the process, we check if we arrived at the end of the buffer.
 
 ## Example : Simple C++ processor
 
-There, we will see how to manipulate audio with C++. To start with, make sure to understand how the Web Assembly work.
+There, we will see how to manipulate audio with C++. To start with, make sure to understand how the Web Assembly works.
 See [Web Assembly Documentation](https://webassembly.org/getting-started/developers-guide/).
-In this case we will use [Emscripten](https://emscripten.org/) to compile the C++ code into Web Assembly.
+In this case, we will use [Emscripten](https://emscripten.org/) to compile the C++ code into Web Assembly.
 
 ### C++ Function
 
-We start with the simple C++ code that take a buffer source input and a buffer source output, and copy the input into the output.
-Both the input and the output buffer are shared with the JavaScript. We will see how to initialise the buffers in JavaScript later.
+We start with the simple C++ code that takes a buffer source input and a buffer source output and copies the input into the output.
+Both the input and the output buffer are shared with JavaScript. We will see how to initialize the buffers in JavaScript later.
 
 ```cpp
 #include <emscripten.h>
@@ -99,18 +99,18 @@ extern "C" {
 ```
 
 Care about defining the same `KRenderQuantumFrames` and the `kBytesPerChannel` in C++ and JavaScript.
-Nothing particular about this code except that we work with pointers declared in JavaScript. 
+Nothing particular about this code except that we work with pointers declared in JavaScript.
 
 ### Compiling
 
-To Compiles the C++ code, we used Emscripten. There we will use some options to keep only the .wasm.
-We take in entry, the .cpp and Compile in a .wasm file. Before make sure to set up your Emscripten environment.
+To compile the C++ code, we used Emscripten. There we will use some options to keep only the .wasm.
+We take in the entry, the .cpp, and compile it into a .wasm file. Before make sure to set up your Emscripten environment.
 To understand all the compiling options, see [Emscripten Flags Settings](https://github.com/emscripten-core/emscripten/blob/main/src/settings.js).
 Check the compiling process in the [Makefile](example2-js-cpp/Makefile).
 
 ### Fetch Web Assembly
 
-In order to give to the processor, the web assembly module, we have to instantiate before creating the processor.
+To give the processor, the web assembly module, we have to instantiate it before creating the processor.
 With the following lines :
 
 ```js
@@ -121,7 +121,7 @@ async function loadWasm() {
 ```
 
 There `moduleWasm` is a global variable that we will give to the processor options.
-When we create the audio node, we give to the processor through the processors options the Web Assembly module.
+When we create the audio node, we give it to the processor through the processor options in the Web Assembly module.
 
 ```js
 const node = new AudioPlayerNode(audioCtx, 2, moduleWasm);
@@ -145,8 +145,8 @@ constructor(context, channelCount, moduleWasm) {
 ### Instantiate the Web Assembly Module
 
 In the processor, you will have access to the module thanks to the processor options.
-When you create the processor, you will have to instantiate the module, in order to use the C++ function.
-There is multiple ways to do this, there, we use the method as following :
+When you create the processor, you will have to instantiate the module, to use the C++ function.
+There are multiple ways to do this, there, we use the method as follows:
 
 ```javascript
 setupWasm(options) {
@@ -164,8 +164,8 @@ Now thanks to the _processPerf property we can call the C++ code.
 
 ### Initialize the heaps
 
-In order to share buffer between C++ and JavaScript, we will use Heap Audio Buffer, 
-see [WebAudio SharedArrayBuffer](https://developer.chrome.com/blog/audio-worklet-design-pattern/#webaudio-powerhouse-audio-worklet-and-sharedarraybuffer) 
+To share buffer between C++ and JavaScript, we will use Heap Audio Buffer,
+see [WebAudio SharedArrayBuffer](https://developer.chrome.com/blog/audio-worklet-design-pattern/#webaudio-powerhouse-audio-worklet-and-sharedarraybuffer)
 and the class [HeapAudioBufferInsideProcessor](example2-js-cpp/js/audio-player-processor.js)
 
 On one hand, we have to create the output and input heaps :
@@ -194,7 +194,7 @@ async loadBuffers() {
 }
 ```
 
-Thanks to this two buffers we will use it to share the audio buffer source. 
+Thanks to these two buffers we will use them to share the audio buffer source.
 And then during the process of the processor, we will use the C++ code :
 
 ```javascript
@@ -205,12 +205,12 @@ let returnCode = this._processPerf(
 );
 ```
 
-## Example : Simple Web Audio Module processor
+## Example: Simple Web Audio Module processor
 
-In this example, we will use the simple JavaScript processor, to facilitate the understanding of the code.
+In this example, we will use a simple JavaScript processor, to facilitate the understanding of the code.
 Before jumping into the code, be sure to check the [Web Audio Module API](https://github.com/webaudiomodules/wam-examples/wiki/SDK-Overview) first.
 
-In order to create our processor with WAM standards, it requires to use the [SDK](https://github.com/webaudiomodules/sdk).
+Create our processor with WAM standards, which requires to use of the [SDK](https://github.com/webaudiomodules/sdk).
 
 ### Initialize the SDK
 
@@ -234,7 +234,7 @@ const {default: WAM2} = await import(plugin2Url);
 
 ### Creating Audio Node with WAM
 
-In order to give our custom wam processor, we will create a class that extends WAM, to give access to the custom audio node.
+To give our custom wam processor, we will create a class that extends WAM, to give access to the custom audio node.
 See [MyWam](example3/my-wam.js).
 
 Now that our host is initialized, we can create instances of the host and the plugins as follows.
@@ -245,13 +245,13 @@ let pluginInstance1 = await WAM1.createInstance(hostGroupId, audioCtx);
 let pluginInstance2 = await WAM2.createInstance(hostGroupId, audioCtx);
 ```
 
-We have now access to the audio node with `wamInstance.audioNode`. It works as well for the plugins instance.
+We have access to the audio node with `wamInstance.audioNode`. It works as well for the plugin instance.
 
 ### WAM Processor
 
-The WAM processor, is the same as the pure JavaScript apart from the registering method in the Audio Worklet.
-In WAM the processor is registered in the GlobalScope of the Audio Worklet. To gives access to the options, 
-you will need to define a function that return your processors as follows :
+The WAM processor is the same as pure JavaScript apart from the registering method in the Audio Worklet.
+In WAM the processor is registered in the GlobalScope of the Audio Worklet. To give access to the options,
+you will need to define a function that returns your processors as follows :
 
 ```javascript
 const getProcessor = (moduleId) => {
