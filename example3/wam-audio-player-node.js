@@ -10,18 +10,33 @@ import getProcessor from "./wam-audio-player-processor.js";
  */
 export default class MyWamNode extends WamNode {
 
+    /**
+     * Register scripts required for the processor. Must be called before constructor.
+     * @param {BaseAudioContext} audioContext
+     * @param {string} moduleId
+     */
     static async addModules(moduleId) {
         const { audioWorklet } = audioCtx;
         await super.addModules(audioCtx, moduleId);
         await addFunctionModule(audioWorklet, getProcessor, moduleId);
     }
 
-    constructor(module, options) {
-        super(module, options);
+    constructor(module) {
+        super(module,
+            {
+                processorOptions: {
+                    numberOfInputs: 1,
+                    numberOfOutputs: 1,
+                    outputChannelCount: [2],
+                    useSab: true
+                }
+            });
     }
 
     /**
-     * @param {Float32Array[]} audio
+     * @property {Function} setAudio Sends the audio buffer.
+     *
+     * @param {Float32Array[]} audio Audio Buffer to be transferred to the processor in the audio to process.
      */
     setAudio(audio) {
         this.port.postMessage({ audio });

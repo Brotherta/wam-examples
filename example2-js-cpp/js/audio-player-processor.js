@@ -52,10 +52,6 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
          * @property {number} playhea Current position in the audio buffer.
          */
         this.playhead = 0;
-        /**
-         * @property {boolean} ready Boolean to check if WebAssembly Module is ready.
-         */
-        this.ready = false;
 
         /**
          * @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e
@@ -83,11 +79,9 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
          */
         WebAssembly.instantiate(options.processorOptions.moduleWasm)
             .then(instance => {
-                console.log(instance);
                 this.instance = instance.exports;
                 this._processPerf = this.instance.processPerf;
                 this.loadBuffers();
-                this.ready = true;
             })
             .catch(err => console.log(err));
     }
@@ -125,7 +119,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
      * C++ code fills the Output Heap Audio Buffer. At the end of the process, we copy out the result of the output Heap.
      */
     process(inputs, outputs, parameters) {
-        if (!this.audio || !this.ready) return true;
+        if (!this.audio) return true;
         let input = [];
         let output = outputs[0];
         let channelCount = this.audio.length;

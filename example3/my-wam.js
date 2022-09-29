@@ -17,16 +17,7 @@ export default class MyWam extends WebAudioModule {
      */
     async createAudioNode(initialState) {
         await MyWamNode.addModules(this.moduleId);
-        const node = new MyWamNode(
-            this,
-            {
-                processorOptions: {
-                    numberOfInputs: 1,
-                    numberOfOutputs: 1,
-                    outputChannelCount: [2],
-                    useSab: true
-                }
-            });
+        const node = new MyWamNode(this);
 
         /**
          * Initialize the node audio node. Register the processor in the audio context and the WAM group.

@@ -1,3 +1,11 @@
+/**
+ * Function to get the processor. We need it as it is for later when we will add the processor to the AudioWorklet.
+ * We will take the function, stringify it and inject to the AudioWorklet with parameters.
+ *
+ * @param moduleId
+ * @return {MyWamProcessor}
+ */
+
 const getProcessor = (moduleId) => {
     /** @type {AudioWorkletGlobalScope} */
         // @ts-ignore
@@ -6,6 +14,12 @@ const getProcessor = (moduleId) => {
 
     const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 
+    /**
+     * @class
+     *
+     * Class of our custom processor implementing WAM standard. In this example, the processor doesn't provide any new features
+     * and doesn't take advantage of the Web Audio Module SDK. It will in a later example with plugins and plugin's parameters.
+     */
     class MyWamProcessor extends ModuleScope.WamProcessor {
         static get parameterDescriptors() {
             return [{
@@ -39,20 +53,14 @@ const getProcessor = (moduleId) => {
             };
         }
 
-        async _onMessage(e) {
-            await super._onMessage(e);
-        }
-
-        _processEvent(event) {
-            this.emitEvents(event);
-        }
-
-        _process(){}
-
         /**
+         * @property {Function} process Renderer of the audio buffer. It consumes the quantum block.
+         *
          * @param {Float32Array[][]} inputs
          * @param {Float32Array[][]} outputs
          * @param {Record<string, Float32Array>} parameters
+         *
+         * @description Default value of the quantum frame is 128.
          */
         process(inputs, outputs, parameters) {
             if (!this.audio) return true;

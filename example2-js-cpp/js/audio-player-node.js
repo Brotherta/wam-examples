@@ -35,7 +35,6 @@ class AudioPlayerNode extends AudioWorkletNode {
      * @param {Float32Array[]} audio Audio Buffer to be transferred to the processor in the audio to process.
      */
     setAudio(audio) {
-        console.log("sending audio");
         this.port.postMessage({audio});
     }
 }
