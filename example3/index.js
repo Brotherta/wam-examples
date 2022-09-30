@@ -1,6 +1,6 @@
 import {drawBuffer} from "../lib/utils/drawer.js";
 
-const audioUrl = "https://wasabi.i3s.unice.fr/WebAudioPluginBank/Guitar.mp3";
+const audioUrl = "../assets/audio/Guitar.mp3";
 const plugin1Url = "https://mainline.i3s.unice.fr/wam2/packages/StonePhaserStereo/index.js";
 const plugin2Url = "https://mainline.i3s.unice.fr/wam2/packages/BigMuff/index.js";
 

@@ -1,6 +1,6 @@
 import {drawBuffer} from "../lib/utils/drawer.js";
 
-const audioUrl = "../assets/audio/BasketCaseGreendayriffDI.mp3";
+const audioUrl = "../assets/audio/Guitar.mp3";
 
 const audioCtx = new AudioContext();
 
