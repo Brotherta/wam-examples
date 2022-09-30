@@ -31,6 +31,9 @@ export default class MyWamNode extends WamNode {
                     useSab: true
                 }
             });
+
+        // We add to the supported events, the WAM automation for plugins' parameters.
+        this._supportedEventTypes = new Set(['wam-automation']);
     }
 
     /**

@@ -1,12 +1,14 @@
 import {drawBuffer} from "../lib/utils/drawer.js";
+import applyAutomation from "./automation.js";
 
-const audioUrl = "https://wasabi.i3s.unice.fr/WebAudioPluginBank/Guitar.mp3";
+const audioUrl = "../assets/audio/Guitar.mp3";
 const plugin1Url = "https://mainline.i3s.unice.fr/wam2/packages/StonePhaserStereo/index.js";
 const plugin2Url = "https://mainline.i3s.unice.fr/wam2/packages/BigMuff/index.js";
 
 export const audioCtx = new AudioContext();
 
 const btnStart = document.getElementById("btn-start");
+const btnRestart = document.getElementById("btn-restart");
 const inputLoop = document.getElementById("input-loop");
 const canvas = document.getElementById("canvas1");
 const example = document.getElementById("example");
@@ -15,6 +17,7 @@ const example = document.getElementById("example");
  * Self-invoking asynchronous function to initialize the host.
  */
 (async () => {
+    await audioCtx.suspend();
     /* Import from the Web Audio Modules 2.0 SDK to initialize Wam Host.
     It initializes a unique ID for the current AudioContext. */
     const {default: initializeWamHost} = await import("../lib/sdk/initializeWamHost.js");
@@ -57,6 +60,9 @@ const example = document.getElementById("example");
     let pluginInstance2 = await WAM2.createInstance(hostGroupId, audioCtx);
     let pluginDom2 = await pluginInstance2.createGui();
 
+    node.connectEvents(pluginInstance1._audioNode.instanceId);
+    node.connectEvents(pluginInstance2._audioNode.instanceId);
+
     // Sending audio to the processor and connecting the node to the output destination.
     node.setAudio(operableAudioBuffer.toArray());
     node.connect(pluginInstance1._audioNode).connect(pluginInstance2._audioNode).connect(audioCtx.destination);
@@ -75,17 +81,26 @@ const example = document.getElementById("example");
     mount2.innerHTML = "";
     await mount2.appendChild(pluginDom2);
 
+    await applyAutomation(node, pluginInstance2, audioBuffer.duration);
+
     // Connecting host's logic of the page.
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") audioCtx.resume();
         const playing = node.parameters.get("playing").value;
         if (playing === 1) {
             node.parameters.get("playing").value = 0;
+            audioCtx.suspend();
             btnStart.textContent = "Start";
         } else {
+            audioCtx.resume();
             node.parameters.get("playing").value = 1;
             btnStart.textContent = "Stop";
         }
+    }
+    btnRestart.onclick = () => {
+        node.clearEvents();
+        node.port.postMessage({restart: true});
+        applyAutomation(node, pluginInstance2, audioBuffer.duration);
     }
     inputLoop.checked = true;
     inputLoop.onchange = () => {

@@ -26,6 +26,7 @@ Using JavaScript, C++, or Web Audio Modules.
 - [Example 1](#example--simple-javascript-processor)
 - [Example 2](#example--simple-c-processor)
 - [Example 3](#example--simple-web-audio-module-processor)
+- [Example 4](#example-web-audio-module-processor--plugins-parameter-automation)
 
 ## About The Repository
 
@@ -272,3 +273,6 @@ const getProcessor = (moduleId) => {
 }
 export default getProcessor;
 ```
+
+## Example: Web Audio Module Processor & Plugin's Parameter Automation
+
