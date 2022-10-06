@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example : Simple JavaScript Web Audio Module 2.0 Processor</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/wam-logo.png">
+    <link rel="stylesheet" type="text/css" href="../lib/fomantic-ui/semantic.css">
+    <link rel="stylesheet" href="../lib/prism/prism.css">
+    <link rel="stylesheet" type="text/css" href="../lib/css/style.css">
+    <script src="../lib/jquery/jquery-3.6.1.min.js"></script>
+    <script src="../lib/fomantic-ui/semantic.js"></script>
+</head>
+<body>
+
+<div class="navigation">
+    <div class="ui stackable menu huge">
+        <a href="../index.html">
+            <div class="item">
+                <img src="../assets/images/wam-logo.png" alt="logo wam">
+            </div>
+        </a>
+        <a href="../example1-js/index.html" id="example1" class="item">Example 1</a>
+        <a href="../example2-js-cpp/index.html" id="example2" class="item">Example 2</a>
+        <a id="example3" class="item active">Example 3</a>
+        <a href="../example4/index.html" id="example4" class="item">Example 4</a>
+    </div>
+</div>
+
+<h2 class="ui dividing header centered">
+    Example : Simple JavaScript Web Audio Module 2.0 Processor
+</h2>
+
+<div class="loading">
+    <img id="loading-gif" src="../assets/images/circle-loading.gif" alt="loading">
+</div>
+
+<div id="example" class="example plugin" style="display: none;">
+    <h4 class="ui dividing header centered">Guitar Song : <a
+            href="https://www.chosic.com/download-audio/29514/">https://www.chosic.com/download-audio/29514/</a>
+    </h4>
+    <div class="wave">
+        <canvas id="canvas1"></canvas>
+    </div>
+    <div class="section">
+        <button id="btn-start" class="ui button">Start</button>
+        <div class="ui toggle checkbox">
+            <input type="checkbox" name="loop" id="input-loop">
+            <label>Loop</label>
+        </div>
+    </div>
+    <div class="plugins">
+        <div id="mount1"></div>
+        <div id="mount2"></div>
+    </div>
+</div>
+
+
+</body>
+
+
+<script src="./index.js" type="module"></script>
+<script src="../lib/prism/prism.js"></script>
+</html>

@@ -12,47 +12,360 @@
 </head>
 <body>
 
-<div class="navigation">
-    <div class="ui stackable menu huge">
-        <a href="../index.html">
-            <div class="item">
-                <img src="../assets/images/wam-logo.png" alt="logo wam">
-            </div>
+<div class="ui visible left sidebar inverted vertical menu">
+    <div class="item">
+        <a class="ui logo icon image" href="/index.html">
+            <img src="../assets/images/wam-logo.png" alt="logo wam" width="50px">
         </a>
-        <a id="example1" class="item active">Example 1</a>
-        <a href="../example2-js-cpp/index.html" id="example2" class="item">Example 2</a>
-        <a href="../example3/index.html" id="example3" class="item">Example 3</a>
-        <a href="../example4/index.html" id="example4" class="item">Example 4</a>
+        <a href="https://github.com/webaudiomodules">
+            <b>Web Audio Modules</b>
+        </a>
     </div>
+
+    <a id="example1" class="item active">Example 1</a>
+    <div class="menu">
+        <a class="item" href="#demo">Demo</a>
+        <a class="item" href="#specifications">Specifications</a>
+        <a class="item" href="#prerequisites">Prerequisites</a>
+        <a class="item" href="#index">Index.html</a>
+        <a class="item" href="#operable">Operable audio buffer</a>
+        <a class="item" href="#main">Main script</a>
+        <a class="item" href="#init">Initialization</a>
+        <a class="item" href="#connection">Audio node connection</a>
+        <a class="item" href="#processor">Audio processor</a>
+        <a class="item" href="#conclusion">Conclusion</a>
+
+    </div>
+    <a href="../example2-js-cpp/index.html" id="example2" class="item">Example 2</a>
+    <a href="../example3/index.html" id="example3" class="item">Example 3</a>
+    <a href="../example4/index.html" id="example4" class="item">Example 4</a>
+    <a href="../example5/index.html" id="example5" class="item">Example 5</a>
+    <a href="https://github.com/Brotherta/wam-examples">
+        <div class="item">
+            <img src="/assets/images/github-logo.png" width="50%">
+        </div>
+    </a>
 </div>
 
+<div class="example-container">
+    <h2 class="ui dividing header" id="demo">
+        Example : Simple JavaScript Audio Worklet
+    </h2>
 
-<h2 class="ui dividing header centered">
-    Example : Simple JavaScript Audio Worklet
-</h2>
+    <div class="loading">
+        <img id="loading-gif" src="../assets/images/circle-loading.gif" alt="loading">
+    </div>
 
-<div class="loading">
-    <img id="loading-gif" src="../assets/images/circle-loading.gif" alt="loading">
+    <div id="example" class="example" style="display: none">
+        <h4 class="ui dividing header">Guitar Song : <a
+                href="https://www.chosic.com/download-audio/29514/">https://www.chosic.com/download-audio/29514/</a>
+        </h4>
+        <div class="wave">
+            <canvas id="canvas1"></canvas>
+        </div>
+        <div class="section">
+            <button id="btn-start" class="ui button">Start</button>
+            <div class="ui toggle checkbox">
+                <input type="checkbox" name="loop" id="input-loop">
+                <label>Loop</label>
+            </div>
+        </div>
+    </div>
+
+    <section class="tutorial">
+        <h3 class="ui dividing header" id="specifications">
+            Specifications :
+        </h3>
+        <p>
+            This first example uses a simple audio worklet processor written in pure JavaScript. We can customize the processor by using the Web Audio API.
+            You will see how to customize your processor, how to host it, and play music with it.
+        </p>
+
+        <h3 class="ui dividing header" id="prerequisites">
+            Prerequisites :
+        </h3>
+        <p>
+            We only need standard JavaScript libraries.
+            The only prerequisite is to understand and read the official
+            <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio API</a>.
+        </p>
+
+        <h3 class="ui dividing header" id="index">
+            Create an index.html :
+        </h3>
+        <pre class="code-snippets line-numbers">
+<code class="language-markup">&lt;!DOCTYPE html>
+&lt;html lang="en">
+&lt;head>
+&lt;meta charset="UTF-8">
+&lt;title>Simple Javascript Audio Processor&lt;/title>
+&lt;/head>
+&lt;body>
+
+&lt;button id="btn-start" class="ui button">Start&lt;/button>
+
+&lt;scrip src="index.js">&lt;/scrip>
+&lt;/body>
+&lt;/html></code>
+</pre>
+        <p>
+            Simple index.html file. Nothing special about it. You can add everything you want to glow up your host.
+        </p>
+
+
+        <h3 class="ui dividing header" id="operable">
+            Create an Operable Audio Buffer :
+        </h3>
+        <pre class="line-numbers">
+<code class="language-js">class OperabeAudioBuffer extends AudioBuffer {
+toArray(shared = false) {
+    const supportSAB = typeof SharedArrayBuffer !== "undefined";
+    const channelData = [];
+    const {numberOfChannels, length} = this;
+    for (let i = 0; i < numberOfChannels; i++) {
+        if (shared && supportSAB) {
+            channelData[i] = new Float32Array(new SharedArrayBuffer(length * Float32Array.BYTES_PER_ELEMENT));
+            channelData[i].set(this.getChannelData(i));
+        } else {
+            channelData[i] = this.getChannelData(i);
+        }
+    }
+    return channelData;
+}
+}
+</code>
+</pre>
+        <p>
+            Because the Web Audio API is using Float32Array to process the sound,
+            we need to create a custom Audio Buffer. We use it to send the audio via the post message of the processor in the
+            audio thread. You can read the
+            <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletNode/port">
+                documentation</a> of the audio worklet node port.
+        </p>
+
+
+        <h3 class="ui dividing header" id="main">
+            Main script in index.js :
+        </h3>
+        <pre class="line-numbers">
+<code class="language-js">const audioUrl = "&lt;url-to-a-song>";
+
+// Initialize the Audio Context
+const audioCtx = new AudioContext();
+const btnStart = document.getElementById("btn-start");
+
+(async () => {
+// Code of your host goes in a self-invoking asynchronous function.
+})();
+</code>
+</pre>
+        <p>
+            The API supports loading audio file data in multiple formats, such as WAV, MP3, AAC, OGG and
+            <a target="_blank" href="https://en.wikipedia.org/wiki/Audio_file_format">others</a>.
+            Browser support for different audio formats varies.
+        </p>
+
+
+        <h3 class="ui dividing header" id="initialization">
+            Initialize the audio and the page :
+        </h3>
+        <pre class="line-numbers">
+<code class="language-js">
+// Register our custom JavaScript processor in the current audio worklet.
+await audioCtx.audioWorklet.addModule("./audio-player-processor.js");
+
+const response = await fetch(audioUrl);
+const audioArrayBuffer = await response.arrayBuffer();
+const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
+
+//Transform the audio buffer into a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example, editing...)
+const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
+const node = new AudioPlayerNode(audioCtx, 2);
+
+// Connecting host's logic of the page.
+btnStart.onclick = () => {
+if (audioCtx.state === "suspended") audioCtx.resume();
+const playing = node.parameters.get("playing").value;
+if (playing === 1) {
+    node.parameters.get("playing").value = 0;
+    btnStart.textContent = "Start";
+} else {
+    node.parameters.get("playing").value = 1;
+    btnStart.textContent = "Stop";
+}
+}
+</code>
+</pre>
+        <p>
+            We first need to register the custom processor to the web audio API by using the
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Worklet/addModule">addModule</a>
+            method. We use our custom operable audio buffer to transform the buffer into a Float32Array and send it to the processor.
+        </p>
+
+
+        <h3 class="ui dividing header" id="connection">
+            Connecting the audio nodes :
+        </h3>
+        <pre class="line-numbers">
+<code class="language-js">
+//Sending audio to the processor and connecting the node to the output destination.
+node.port.postMessage(operableAudioBuffer.toArray());
+
+node.connect(audioCtx.destination);
+node.parameters.get("playing").value = 0;
+node.parameters.get("loop").value = 1;
+</code>
+</pre>
+        <p>
+            In this example, we will use our custom AudioNode. But it is not mandatory to create a custom audio node.
+        </p>
+
+        <h3 class="ui dividing header" id="processor">
+            Audio processor class:
+        </h3>
+        <pre class="line-numbers">
+<code class="language-js">class AudioPlayerProcessor extends AudioWorkletProcessor {
+
+static get parameterDescriptors() {
+    return [{
+        name: "playing",
+        minValue: 0,
+        maxValue: 1,
+        defaultValue: 0
+    }];
+}
+
+constructor(options) {
+    super(options);
+
+    this.audio = null;
+    this.playhead = 0;
+
+    this.port.onmessage = (e) => {
+        if (e.data.audio) {
+            this.audio = e.data.audio;
+        }
+    };
+}
+
+process(inputs, outputs, parameters) {
+    if (!this.audio) return true;
+
+    // Initializing the buffer with the given outputs and the audio length.
+    const bufferSize = outputs[0][0].length;
+    const audioLength = this.audio[0].length;
+
+    // Only one output is used. Because we use our buffer source see {OperableAudioBuffer}
+    const output = outputs[0];
+
+    for (let i = 0; i < bufferSize; i++) {
+        const playing = !!(i < parameters.playing.length ? parameters.playing[i] : parameters.playing[0]);
+        if (!playing) continue; // Not playing
+
+        const channelCount = Math.min(this.audio.length, output.length);
+        for (let channel = 0; channel < channelCount; channel++) {
+            output[channel][i] = this.audio[channel][this.playhead];
+        }
+        this.playhead++;
+    }
+    return true;
+}
+}
+</code>
+</pre>
+        <p>
+            The processor represents an audio processing code that handles the audio buffer to play a song. To better understand the use and the idea behind the processor,
+            read the documentation of the API and I suggest you read
+            <a href="https://hacks.mozilla.org/2020/05/high-performance-web-audio-with-audioworklet-in-firefox/">this article
+            </a> from <a href="https://github.com/padenot">Paul Adenot</a>.
+        </p>
+
+        <h3 class="ui dividing header">
+            Registering the processor :
+        </h3>
+        <pre class="line-numbers">
+<code class="language-js">
+const {registerProcessor} = globalThis;
+
+try {
+registerProcessor("audio-player-processor", AudioPlayerProcessor);
+} catch (error) {
+console.warn(error);
+}
+
+</code>
+</pre>
+        <p>
+            To use the processor, it is needed to register it in the AudioWorkletGlobalScope, by using the registerProcessor method. Read about more
+            <a href=https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope/registerProcessor"></a>here.
+        </p>
+
+        <h3 class="ui dividing header" id="conclusion">
+            Conclusion :
+        </h3>
+        <p>
+            We're all set to use our first custom processor, and play a song with it. You can try it by yourself following this example.
+            Further more details are available on the Github's <a href="https://github.com/Brotherta/wam-examples">repository</a>.
+        </p>
+        <p>
+            If you are comfortable with this example, make sure to see the
+            <a href="../example2-js-cpp/index.html">next</a>
+            example. We will use a processor that uses Web Assembly, to process the audio data.
+        </p>
+        <p>
+            Special thanks to <a href="https://github.com/Fr0stbyteR">Shihong Ren</a> who writes this example, and
+            <a href="https://github.com/micbuffa">Michel Buffa</a> who supervises the project.
+        </p>
+
+
+    </section>
 </div>
 
-<div id="example" class="example" style="display: none">
-    <h4 class="ui dividing header centered">Guitar Song : <a
-            href="https://www.chosic.com/download-audio/29514/">https://www.chosic.com/download-audio/29514/</a>
-    </h4>
-    <div class="wave">
-        <canvas id="canvas1"></canvas>
-    </div>
-    <div class="section">
-        <button id="btn-start" class="ui button">Start</button>
-        <div class="ui toggle checkbox">
-            <input type="checkbox" name="loop" id="input-loop">
-            <label>Loop</label>
+<div class="ui vertical footer segment">
+    <div class="ui center aligned container">
+        <div class="ui stackable grid">
+            <div class="three wide column">
+                <h4 class="ui header">Community</h4>
+                <div class="ui link list">
+                    <a class="item" href="https://github.com/webaudiomodules/api" target="_blank">Help contribute</a>
+                    <a class="item" href="https://github.com/webaudiomodules/api/issues" target="_blank">Submit an
+                        Issue</a>
+                    <a class="item" href="https://gitter.im/Semantic-Org/Semantic-UI" target="_blank">Join our Chat</a>
+                    <a class="item" href="https://www.webaudiomodules.org/">Community Website</a>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui header">Network</h4>
+                <div class="ui link list">
+                    <a class="item" href="https://github.com/webaudiomodules/api" target="_blank">GitHub Repo</a>
+                    <a class="item" href="https://www.w3.org/groups/wg/audio" target="_blank">W3C Audio Working
+                        Groupe</a>
+                    <a class="item" href="https://github.com/webaudiomodules/wam-examples/wiki">SDK Wiki</a>
+                </div>
+            </div>
+            <div class="seven wide right floated column">
+                <h4 class="ui header">Help to contibute to this project</h4>
+                <form action="https://github.com/webaudiomodules"></form>
+                <button type="submit" class="ui large orange button">Contribute to Web Audio Modules</button>
+            </div>
+        </div>
+        <div class="ui section divider"></div>
+        <img src="/assets/images/wam-logo.png" class="ui centered mini image">
+        <div class="ui horizontal small divided link list">
+            <a class="item" href="https://github.com/webaudiomodules/wam-examples/blob/master/LICENSE" target="_blank">Free
+                &amp; Open Source (MIT)</a>
         </div>
     </div>
 </div>
 
 
+
 <script src="./index.js" type="module"></script>
 <script src="../lib/prism/prism.js"></script>
+<script>
+    $('.ui.sidebar')
+        // .sidebar('toggle');
+    ;
+</script>
 </body>
 </html>
