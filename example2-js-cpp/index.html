@@ -40,34 +40,42 @@
         <a class="item" href="#demo">Demo</a>
         <a class="item" href="#specifications">Specifications</a>
         <a class="item" href="#prerequisites">Prerequisites</a>
-        <a class="item" href="#index">Index.html</a>
+        <a class="item" href="#makefile">Makefile compiling Emscripten</a>
+        <a class="item" href="#cpp">C++ File</a>
+        <a class="item" href="#audio-node">Custom Audio Node</a>
+        <a class="item" href="#instantiate">Instantiate Web Assembly</a>
+        <a class="item" href="#heaps">Initialize the heaps</a>
+        <a class="item" href="#conclusion">Conclusion</a>
     </div>
     <a href="../example3/index.html" id="example3" class="item">Example 3</a>
     <div class="menu">
         <a class="item" href="../example3/index.html#demo">Demo</a>
         <a class="item" href="../example3/index.html#specifications">Specifications</a>
         <a class="item" href="../example3/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example3/index.html#index">Index.html</a>
+        <a class="item" href="../example3/index.html#WAM">Web Audio Modules</a>
+        <a class="item" href="../example3/index.html#initialize">WAM SDK</a>
+        <a class="item" href="../example3/index.html#creating">Instantiate plugins</a>
+        <a class="item" href="../example3/index.html#processor">Custom WAM processor</a>
+        <a class="item" href="../example3/index.html#conclusion">Conclusion</a>
     </div>
     <a href="../example4/index.html" id="example4" class="item">Example 4</a>
     <div class="menu">
         <a class="item" href="../example4/index.html#demo">Demo</a>
         <a class="item" href="../example4/index.html#specifications">Specifications</a>
         <a class="item" href="../example4/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example4/index.html#index">Index.html</a>
+        <a class="item" href="../example4/index.html#simulate">Simulate plugin automation</a>
+        <a class="item" href="../example4/index.html#connecting">Connecting WAM events</a>
+        <a class="item" href="../example4/index.html#handling">Handling events in processor</a>
+        <a class="item" href="../example4/index.html#conclusion">Conclusion</a>
     </div>
-    <a href="../example5/index.html" id="example5" class="item">Example 5</a>
-    <div class="menu">
-        <a class="item" href="../example5/index.html#demo">Demo</a>
-        <a class="item" href="../example5/index.html#specifications">Specifications</a>
-        <a class="item" href="../example5/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example5/index.html#index">Index.html</a>
+    <div class="item">
+        <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
+            <img src="../assets/images/github-logo-light.png" alt="logo wam" width="25px">
+        </a>
+        <a href="https://github.com/Brotherta/wam-examples">
+            <b>Github repository</b>
+        </a>
     </div>
-    <a href="https://github.com/Brotherta/wam-examples">
-        <div class="item">
-            <img src="/assets/images/github-logo.png" width="50%">
-        </div>
-    </a>
 </div>
 
 <div class="example-container">
@@ -100,39 +108,252 @@
             Specifications :
         </h3>
         <p>
-            This first example uses a simple audio worklet processor written in pure JavaScript. We can customize the processor by using the Web Audio API.
-            You will see how to customize your processor, how to host it, and play music with it.
+            There, we will see how to manipulate audio with C++. To start with, make sure to understand how the Web Assembly works.
+            See
+            <a target="_blank" href="https://webassembly.org/getting-started/developers-guide/">Web Assembly Documentation</a>.
+            In this case, we will use
+            <a target="_blank" href="https://emscripten.org/">Emscripten</a> to compile the C++ code into Web Assembly.
         </p>
 
         <h3 class="ui dividing header" id="prerequisites">
             Prerequisites :
         </h3>
         <p>
-            We only need standard JavaScript libraries.
-            The only prerequisite is to understand and read the official
-            <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio API</a>.
+            Make sure to download Emscripten via the official website
+            and use their script to activate the development environment.
+            To use and compile C++ or other languages, there is a lot of compiling flags, here we will use them to compile the C++ into a .wasm.
+            But you can decide to compile your C++ into a JavaScript Module that you can import in your code.
+            To understand the MakeFile make sure to refer to the
+            <a target="_blank" href="https://github.com/emscripten-core/emscripten/blob/main/src/settings.js">Emscripten Flags Settings</a>.
         </p>
 
-        <h3 class="ui dividing header" id="index">
-            Create an index.html :
+        <h3 class="ui dividing header" id="makefile">
+            MakeFile :
         </h3>
         <pre class="code-snippets line-numbers">
-<code class="language-markup">&lt;!DOCTYPE html>
-&lt;html lang="en">
-&lt;head>
-&lt;meta charset="UTF-8">
-&lt;title>Simple Javascript Audio Processor&lt;/title>
-&lt;/head>
-&lt;body>
+<code class="language-makefile"> # Makefile
 
-&lt;button id="btn-start" class="ui button">Start&lt;/button>
+DEPS = ./cpp/processor-perf.cpp
+OUTPUT_WASM = ./ProcessWasm.wasm
+CC = emcc
 
-&lt;scrip src="index.js">&lt;/scrip>
-&lt;/body>
-&lt;/html></code>
+FLAGS = --no-entry \
+    -s WASM=1 \
+    -s EXPORTED_FUNCTIONS=_processPerf \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -o $(OUTPUT_WASM) $(DEPS) \
+
+build: $(DEPS)
+	@$(CC) $(FLAGS)
+</code>
 </pre>
         <p>
-            Simple index.html file. Nothing special about it. You can add everything you want to glow up your host.
+            We first give our C++ code to the compiler, by running the makefile, we retrieve a .wasm
+            that we will instantiate later in the code.
+        </p>
+
+        <h3 class="ui dividing header" id="cpp">
+            C++ File :
+        </h3>
+        <pre class="code-snippets line-numbers">
+<code class="language-cpp"> // processor-perf.cpp
+
+#include &lt;emscripten.h>
+#include &lt;emscripten/bind.h>
+using namespace emscripten;
+
+extern "C" {
+    int processPerf(uintptr_t input_ptr, uintptr_t output_ptr, int channel_count) {
+        const unsigned kRenderQuantumFrames = 128;
+        const unsigned kBytesPerChannel = kRenderQuantumFrames * sizeof(float);
+
+        float *input_buffer = reinterpret_cast&lt;float *>(input_ptr);
+        float *output_buffer = reinterpret_cast&lt;float *>(output_ptr);
+
+        for (unsigned channel = 0; channel < channel_count; ++channel)
+        {
+            float *destination = output_buffer + (channel * kRenderQuantumFrames);
+            float *source = input_buffer + (channel * kRenderQuantumFrames);
+            memcpy(destination, source, kBytesPerChannel);
+        }
+        return 1;
+    }
+}
+</code>
+</pre>
+        <p>
+            This function demonstrates how to use C++ code in javascript. This function is only copying the content of the input buffer,
+            into the output buffer.
+        </p>
+
+        <h3 class="ui dividing header" id="fetching">
+            Fetching the Web Assembly :
+        </h3>
+        <pre class="code-snippets line-numbers">
+<code class="language-js"> // index.js
+let moduleWasm;
+
+async function loadWasm() {
+    WebAssembly.compileStreaming(fetch("./ProcessWasm.wasm"))
+        .then(module => moduleWasm = module);
+}
+
+(async () => {
+    await loadWasm();
+
+    const node = new AudioPlayerNode(audioCtx, 2, moduleWasm);
+
+    /* Code of the host.
+       ...
+    */
+})();
+</code>
+</pre>
+        <p>
+            We will use the loadWasm at the very beginning of the initialization to load the web assembly.
+            Later in our AudioNode, we will give the module in the
+            <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletNode/AudioWorkletNode#:~:text=its%20initial%20value.-,processorOptions,-Optional">options of the processor</a>.
+        </p>
+
+        <h3 class="ui dividing header" id="audio-node">
+            Custom Audio Node :
+        </h3>
+        <pre class="code-snippets line-numbers">
+<code class="language-js"> // audio-player-node.js
+
+export default class AudioPlayerNode extends AudioWorkletNode {
+
+    constructor(context, channelCount, moduleWasm) {
+        super(context, "audio-player-processor", {
+            numberOfInputs: 0,
+            numberOfOutputs: 2,
+            channelCount,
+            processorOptions: {
+                moduleWasm
+            }
+        });
+    }
+
+    setAudio(audio) {
+        this.port.postMessage({audio});
+    }
+}
+</code>
+</pre>
+        <p>
+            With this custom Audio Node, we can give additional parameters to the processor.
+            In this case we send the Web Assembly Module that we previously fetched in the host.
+            Everything is ready to setup the processor.
+        </p>
+
+        <h3 class="ui dividing header" id="instantiate">
+            Instantiate the Web Assembly :
+        </h3>
+        <pre class="code-snippets line-numbers">
+<code class="language-js"> // audio-player-processor.js
+
+class AudioPlayerProcessor extends AudioWorkletProcessor {
+
+    constructor(options) {
+        super(options);
+        this.setupWasm(options);
+    }
+
+    setupWasm(options) {
+        WebAssembly.instantiate(options.processorOptions.moduleWasm)
+            .then(instance => {
+                this.instance = instance.exports;
+                this._processPerf = this.instance.processPerf;
+                this.loadBuffers();
+            })
+            .catch(err => console.log(err));
+    }
+
+    /* Code processor
+       ...
+    */
+}
+</code>
+</pre>
+        <p>
+            In the processor, you will have access to the module thanks to the processor options.
+            When you create the processor, you will have to instantiate the module, to use the C++ function.
+            There are multiple ways to do this, there, we use <b>WebAssembly.instantiate()</b>.
+        </p>
+
+        <h3 class="ui dividing header" id="heaps">
+            Initialize the heaps :
+        </h3>
+        <p>
+            To share buffer between C++ and JavaScript, we will use Heap Audio Buffer, see
+            <a target="_blank" href="https://developer.chrome.com/blog/audio-worklet-design-pattern/#webaudio-powerhouse-audio-worklet-and-sharedarraybuffer">WebAudio SharedArrayBuffer</a>
+            and the class
+            <a target="_blank" href="https://github.com/Brotherta/wam-examples/blob/master/example2-js-cpp/js/audio-player-processor.js">HeapAudioBufferInsideProcessor</a>
+            written by
+            <a target="_blank" href="https://hoch.io/">Hongchan Choi</a>.
+        </p>
+        <p>
+            On one hand, we have to create the output and input heaps :
+        </p>
+        <pre class="code-snippets line-numbers">
+<code class="language-js"> // audio-player-processor.js
+
+const BYTES_PER_SAMPLE = Float32Array.BYTES_PER_ELEMENT;
+
+// The max audio channel on Chrome is 32.
+const MAX_CHANNEL_COUNT = 32;
+
+// WebAudio's render quantum size.
+const RENDER_QUANTUM_FRAMES = 128;
+
+async loadBuffers() {
+    this._heapInputBuffer = new HeapAudioBufferInsideProcessor(
+        this.instance,
+        RENDER_QUANTUM_FRAMES,
+        2,
+        MAX_CHANNEL_COUNT
+    );
+    this._heapOutputBuffer = new HeapAudioBufferInsideProcessor(
+        this.instance,
+        RENDER_QUANTUM_FRAMES,
+        2,
+        MAX_CHANNEL_COUNT
+    );
+}
+</code>
+</pre>
+        <p>
+            Thanks to these two buffers we will use them to share the audio buffer source.
+        </p>
+        <p>
+            And then during the process of the processor, we will use the C++ code :
+        </p>
+        <pre class="code-snippets line-numbers">
+<code class="language-js"> // audio-player-processor.js
+
+let returnCode = this._processPerf(
+    this._heapInputBuffer.getHeapAddress(),
+    this._heapOutputBuffer.getHeapAddress(),
+    channelCount
+);
+</code>
+        </pre>
+
+        <h3 class="ui dividing header" id="conclusion">
+            Conclusion :
+        </h3>
+        <p>
+            We've seen, how to call and execute C++ code with Web Assembly.
+
+        </p>
+        <p>
+            If you are comfortable with this example, make sure to see the
+            <a href="../example3/index.html">next</a>
+            example. For the next example, we will not use the C++ to process the sound to keep the essential part of the example on new features.
+            But we will show how to use the API following the Web Audio Modules standards. We will instantiate Audio plugins by the occasion.
+        </p>
+        <p>
+            Special thanks to <a href="https://hoch.io/">Hongchan Choi</a> that wrote the SharedArrayBuffer class.
         </p>
     </section>
 </div>

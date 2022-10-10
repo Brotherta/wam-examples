@@ -40,35 +40,42 @@
         <a class="item" href="../example2-js-cpp/index.html#demo">Demo</a>
         <a class="item" href="../example2-js-cpp/index.html#specifications">Specifications</a>
         <a class="item" href="../example2-js-cpp/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example2-js-cpp/index.html#index">Index.html</a>
+        <a class="item" href="../example2-js-cpp/index.html#makefile">Makefile compiling Emscripten</a>
+        <a class="item" href="../example2-js-cpp/index.html#cpp">C++ File</a>
+        <a class="item" href="../example2-js-cpp/index.html#audio-node">Custom Audio Node</a>
+        <a class="item" href="../example2-js-cpp/index.html#instantiate">Instantiate Web Assembly</a>
+        <a class="item" href="../example2-js-cpp/index.html#heaps">Initialize the heaps</a>
+        <a class="item" href="../example2-js-cpp/index.html#conclusion">Conclusion</a>
     </div>
     <a href="../example3/index.html" id="example3" class="item">Example 3</a>
     <div class="menu">
         <a class="item" href="../example3/index.html#demo">Demo</a>
         <a class="item" href="../example3/index.html#specifications">Specifications</a>
         <a class="item" href="../example3/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example3/index.html#index">Index.html</a>
-
+        <a class="item" href="../example3/index.html#WAM">Web Audio Modules</a>
+        <a class="item" href="../example3/index.html#initialize">WAM SDK</a>
+        <a class="item" href="../example3/index.html#creating">Instantiate plugins</a>
+        <a class="item" href="../example3/index.html#processor">Custom WAM processor</a>
+        <a class="item" href="../example3/index.html#conclusion">Conclusion</a>
     </div>
     <a href="../example4/index.html" id="example4" class="item">Example 4</a>
     <div class="menu">
         <a class="item" href="../example4/index.html#demo">Demo</a>
         <a class="item" href="../example4/index.html#specifications">Specifications</a>
         <a class="item" href="../example4/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example4/index.html#index">Index.html</a>
+        <a class="item" href="../example4/index.html#simulate">Simulate plugin automation</a>
+        <a class="item" href="../example4/index.html#connecting">Connecting WAM events</a>
+        <a class="item" href="../example4/index.html#handling">Handling events in processor</a>
+        <a class="item" href="../example4/index.html#conclusion">Conclusion</a>
     </div>
-    <a href="../example5/index.html" id="example5" class="item">Example 5</a>
-    <div class="menu">
-        <a class="item" href="../example5/index.html#demo">Demo</a>
-        <a class="item" href="../example5/index.html#specifications">Specifications</a>
-        <a class="item" href="../example5/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example5/index.html#index">Index.html</a>
+    <div class="item">
+        <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
+            <img src="../assets/images/github-logo-light.png" alt="logo wam" width="25px">
+        </a>
+        <a href="https://github.com/Brotherta/wam-examples">
+            <b>Github repository</b>
+        </a>
     </div>
-    <a href="https://github.com/Brotherta/wam-examples">
-        <div class="item">
-            <img src="/assets/images/github-logo.png" width="50%">
-        </div>
-    </a>
 </div>
 
 <div class="example-container">
@@ -128,7 +135,7 @@
 
 &lt;button id="btn-start" class="ui button">Start&lt;/button>
 
-&lt;scrip src="index.js">&lt;/scrip>
+&lt;script src="index.js">&lt;/script>
 &lt;/body>
 &lt;/html></code>
 </pre>
@@ -141,7 +148,8 @@
             Create an Operable Audio Buffer :
         </h3>
         <pre class="line-numbers">
-<code class="language-js">class OperabeAudioBuffer extends AudioBuffer {
+<code class="language-js">// operable-audio-buffer.js
+class OperableAudioBuffer extends AudioBuffer {
 toArray(shared = false) {
     const supportSAB = typeof SharedArrayBuffer !== "undefined";
     const channelData = [];
@@ -172,7 +180,8 @@ toArray(shared = false) {
             Main script in index.js :
         </h3>
         <pre class="line-numbers">
-<code class="language-js">const audioUrl = "&lt;url-to-a-song>";
+<code class="language-js">// index.js
+const audioUrl = "&lt;url-to-a-song>";
 
 // Initialize the Audio Context
 const audioCtx = new AudioContext();
@@ -194,7 +203,8 @@ const btnStart = document.getElementById("btn-start");
             Initialize the audio and the page :
         </h3>
         <pre class="line-numbers">
-<code class="language-js">
+<code class="language-js">// self-invoking function in index.js
+
 // Register our custom JavaScript processor in the current audio worklet.
 await audioCtx.audioWorklet.addModule("./audio-player-processor.js");
 
@@ -231,7 +241,8 @@ if (playing === 1) {
             Connecting the audio nodes :
         </h3>
         <pre class="line-numbers">
-<code class="language-js">
+<code class="language-js">// self-invoking function in index.js
+
 //Sending audio to the processor and connecting the node to the output destination.
 node.port.postMessage(operableAudioBuffer.toArray());
 
@@ -248,7 +259,9 @@ node.parameters.get("loop").value = 1;
             Audio processor class:
         </h3>
         <pre class="line-numbers">
-<code class="language-js">class AudioPlayerProcessor extends AudioWorkletProcessor {
+<code class="language-js">// audio-player-processor.js
+
+class AudioPlayerProcessor extends AudioWorkletProcessor {
 
 static get parameterDescriptors() {
     return [{
@@ -308,7 +321,8 @@ process(inputs, outputs, parameters) {
             Registering the processor :
         </h3>
         <pre class="line-numbers">
-<code class="language-js">
+<code class="language-js">// audio-player-processor.js
+
 const {registerProcessor} = globalThis;
 
 try {

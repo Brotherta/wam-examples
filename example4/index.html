@@ -42,34 +42,42 @@
         <a class="item" href="../example2-js-cpp/index.html#demo">Demo</a>
         <a class="item" href="../example2-js-cpp/index.html#specifications">Specifications</a>
         <a class="item" href="../example2-js-cpp/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example2-js-cpp/index.html#index">Index.html</a>
+        <a class="item" href="../example2-js-cpp/index.html#makefile">Makefile compiling Emscripten</a>
+        <a class="item" href="../example2-js-cpp/index.html#cpp">C++ File</a>
+        <a class="item" href="../example2-js-cpp/index.html#audio-node">Custom Audio Node</a>
+        <a class="item" href="../example2-js-cpp/index.html#instantiate">Instantiate Web Assembly</a>
+        <a class="item" href="../example2-js-cpp/index.html#heaps">Initialize the heaps</a>
+        <a class="item" href="../example2-js-cpp/index.html#conclusion">Conclusion</a>
     </div>
     <a href="../example3/index.html" id="example3" class="item">Example 3</a>
     <div class="menu">
         <a class="item" href="../example3/index.html#demo">Demo</a>
         <a class="item" href="../example3/index.html#specifications">Specifications</a>
         <a class="item" href="../example3/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example3/index.html#index">Index.html</a>
+        <a class="item" href="../example3/index.html#WAM">Web Audio Modules</a>
+        <a class="item" href="../example3/index.html#initialize">WAM SDK</a>
+        <a class="item" href="../example3/index.html#creating">Instantiate plugins</a>
+        <a class="item" href="../example3/index.html#processor">Custom WAM processor</a>
+        <a class="item" href="../example3/index.html#conclusion">Conclusion</a>
     </div>
     <a id="example4" class="item active">Example 4</a>
     <div class="menu">
         <a class="item" href="#demo">Demo</a>
         <a class="item" href="#specifications">Specifications</a>
         <a class="item" href="#prerequisites">Prerequisites</a>
-        <a class="item" href="#index">Index.html</a>
+        <a class="item" href="#simulate">Simulate plugin automation</a>
+        <a class="item" href="#connecting">Connecting WAM events</a>
+        <a class="item" href="#handling">Handling events in processor</a>
+        <a class="item" href="#conclusion">Conclusion</a>
     </div>
-    <a href="../example5/index.html" id="example5" class="item">Example 5</a>
-    <div class="menu">
-        <a class="item" href="../example5/index.html#demo">Demo</a>
-        <a class="item" href="../example5/index.html#specifications">Specifications</a>
-        <a class="item" href="../example5/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example5/index.html#index">Index.html</a>
+    <div class="item">
+        <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
+            <img src="../assets/images/github-logo-light.png" alt="logo wam" width="25px">
+        </a>
+        <a href="https://github.com/Brotherta/wam-examples">
+            <b>Github repository</b>
+        </a>
     </div>
-    <a href="https://github.com/Brotherta/wam-examples">
-        <div class="item">
-            <img src="/assets/images/github-logo.png" width="50%">
-        </div>
-    </a>
 </div>
 
 <div class="example-container">
@@ -108,39 +116,189 @@
             Specifications :
         </h3>
         <p>
-            This first example uses a simple audio worklet processor written in pure JavaScript. We can customize the processor by using the Web Audio API.
-            You will see how to customize your processor, how to host it, and play music with it.
+            In this example, we will show how to automatize the parameters of a plugin. We will automatize
+            the tone parameter of the Big Muff plugin. The tone will start from the minimum value to the maximum value.
+            At half time of the music, the tone will decrease from the maximum to the minimum.
         </p>
 
         <h3 class="ui dividing header" id="prerequisites">
             Prerequisites :
         </h3>
         <p>
-            We only need standard JavaScript libraries.
-            The only prerequisite is to understand and read the official
-            <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio API</a>.
+            The prerequisites of this example are the same as example 3. We will only add to the processor the events handlers for the automation.
         </p>
 
-        <h3 class="ui dividing header" id="index">
-            Create an index.html :
+        <h3 class="ui dividing header" id="simulate">
+            Simulate automation :
         </h3>
+        <p>
+            We will retrieve the parameters' information to add automation to the plugin. Then we will use them to simulate up-and-down automation of the tone parameter.
+        </p>
         <pre class="code-snippets line-numbers">
-<code class="language-markup">&lt;!DOCTYPE html>
-&lt;html lang="en">
-&lt;head>
-&lt;meta charset="UTF-8">
-&lt;title>Simple Javascript Audio Processor&lt;/title>
-&lt;/head>
-&lt;body>
+<code class="language-js">// automation.js
 
-&lt;button id="btn-start" class="ui button">Start&lt;/button>
+export default async function applyAutomation(node, plugin, duration) {
+    let info = await plugin._audioNode.getParameterInfo();
 
-&lt;scrip src="index.js">&lt;/scrip>
-&lt;/body>
-&lt;/html></code>
+    const {minValue, maxValue, label, id} = Object.values(info)[4];
+    console.log(minValue, maxValue, label, id);
+
+    let parameterPoints = [
+        {value: minValue, time: 0},
+        {value: maxValue, time: duration/2},
+        {value: minValue, time: duration}
+    ];
+    let normalizedPoints = normalizePoints(parameterPoints, minValue, maxValue, 0.5, duration, 0.01);
+
+    let events = [];
+    for (let i = 0; i&lt;normalizedPoints.length; i++) {
+        events.push({type: 'wam-automation', data: {id: id, value: normalizedPoints[i].value}, time: audioCtx.currentTime + normalizedPoints[i].time});
+    }
+    node.scheduleEvents(...events);
+}
+</code>
 </pre>
         <p>
-            Simple index.html file. Nothing special about it. You can add everything you want to glow up your host.
+            The parameterPoints are 3 points for the tone parameter. One at the beginning of the song with the minimum value, a second at half of the time to the maximum value, and the last one at the end of the song to the minimum value. We will use a function to normalize the points between the user's points. To do this, we will find the linear function of two successive points.
+        </p>
+        <p>
+            To achieve this, we use this simple function :
+        </p>
+
+<pre class="line-numbers">
+<code class="language-js">// utils.js to import in index.js
+
+// Get from the linear function of points a and b, the value of the parameter at time t.
+function getXFromY(a, b, t) {
+    let gradient = (b.value - a.value)/(b.time - a.time);
+    let intercept = b.value - gradient * b.time;
+    return gradient * t + intercept;
+}
+
+function normalizePoints(points, minValue, maxValue, defValue, duration, step) {
+    // If there is no point defined by the users.
+    if (points.length === 0) {
+        points.push({value: defValue, time: 0});
+    }
+    let firstPoint = points[0];
+    let lastPoint = points[points.length-1];
+
+    // If the first user point isn't set at the beginning of the audio.
+    if (firstPoint.time !== 0) {
+        points.unshift({value: defValue, time: 0});
+    }
+    // If the last user point isn't set at the end of the audio.
+    if (lastPoint.time !== duration) {
+        points.push({value: lastPoint.value, time: duration});
+    }
+
+    let normalizedPoints = []
+    let pointIndex = 0;
+    for (let t = 0; t < duration; t += step) {
+        if (t > points[pointIndex+1].time) {
+            pointIndex++;
+        }
+        let valueAtT = getXFromY(points[pointIndex], points[pointIndex+1], t);
+        // If the current point is at the same time that the previous value, set to the previous value...
+        if (isNaN(valueAtT)) {
+            valueAtT = normalizedPoints[normalizedPoints.length-1].value;
+        }
+        normalizedPoints.push({value: valueAtT, time: t});
+    }
+    // Add the last point.
+    normalizedPoints.push(points[pointIndex+1]);
+    return normalizedPoints;
+}
+</code>
+</pre>
+        <p>
+            With this function we can give 3 points, and with a precision of k step, normalize the points. After the points are normalized we can send them to the processor and queue them as events thanks to web audio modules.
+        </p>
+
+        <h3 class="ui dividing header" id="connecting">
+            Connecting the plugins to the WAM events :
+        </h3>
+        <p>
+            To handle the parameter events from the processor, we need to connect them to the Web Audio Module API.
+        </p>
+<pre class="line-numbers">
+<code class="language-js">// index.js
+
+(async ()=> {
+    audioCtx.suspend()
+
+    /* Code of the host
+       ...
+    */
+
+    node.connectEvents(pluginInstance1._audioNode.instanceId);
+    node.connectEvents(pluginInstance2._audioNode.instanceId);
+
+    await applyAutomation(node, pluginInstance2, audioBuffer.duration);
+
+    /*
+     ...
+    */
+
+}();
+</code>
+</pre>
+        <p>
+            After connecting the plugins, we can now apply the automation. We will emit events to the processor. Events are composed of the type,
+            the parameter identifier, the value of the parameter, and the time.
+        </p>
+        <p>
+            Now that the automation is sent, we want to be cautious about the audio context behavior. We must be aware of when to stop and when to resume the audio context. Because the events are scheduled with the audio context time.
+        </p>
+
+        <h3 class="ui dividing header" id="handling">
+            Handling events in the processor :
+        </h3>
+        <p>We will activate the automation events in the wam node. To achieve this only add this line to the audio node constructor : </p>
+<code class="language-js">this._supportedEventTypes = new Set(['wam-automation']);</code>
+        <p>To see all the supported events, refer to the wam api documentation.</p>
+        <p>
+            The processor need to handle events. To do that, we will add some methods in the processor code :
+        </p>
+<pre class="line-numbers">
+<code class="language-js">// wam-audio-player-processor.js
+
+class MyWamProcessor extends ModuleScope.WamProcessor {
+
+    async _onMessage(e) {
+        await super._onMessage(e);
+        if (e.data.audio) {
+            this.audio = e.data.audio;
+        } else if (typeof e.data.position === "number") {
+            this.playhead = e.data.position * sampleRate;
+        } else if (e.data.restart) {
+            this.playhead = 0;
+        }
+    }
+
+    /**
+     * Process the events received.
+     */
+    _processEvent(event) {
+        this.emitEvents(event);
+    }
+
+    /**
+     * When the automations events are called, this function is called.
+     */
+    _process() {}
+}
+</code>
+</pre>
+        <p>
+            By calling the _onMessage super, when events are emitted from the main thread, the processor can schedule the events in the WAM module. When an event previously scheduled is called during the song, _processEvent will emit events to the wam group in the main thread. Plugins that are connected to the wam group will receive the events.
+        </p>
+
+        <h3 class="ui dividing header" id="conclusion">
+            Conclusion :
+        </h3>
+        <p>
+            You've seen how to use parameter automation in a wam plugin. For further more details, please see the full code in the <a target="_blank" href="http://github.com/Brotherta/wam-examples">github repository</a>. Next example we will see how to implement a simple vue meter.
         </p>
     </section>
 </div>

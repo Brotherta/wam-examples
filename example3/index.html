@@ -40,40 +40,48 @@
         <a class="item" href="../example2-js-cpp/index.html#demo">Demo</a>
         <a class="item" href="../example2-js-cpp/index.html#specifications">Specifications</a>
         <a class="item" href="../example2-js-cpp/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example2-js-cpp/index.html#index">Index.html</a>
+        <a class="item" href="../example2-js-cpp/index.html#makefile">Makefile compiling Emscripten</a>
+        <a class="item" href="../example2-js-cpp/index.html#cpp">C++ File</a>
+        <a class="item" href="../example2-js-cpp/index.html#audio-node">Custom Audio Node</a>
+        <a class="item" href="../example2-js-cpp/index.html#instantiate">Instantiate Web Assembly</a>
+        <a class="item" href="../example2-js-cpp/index.html#heaps">Initialize the heaps</a>
+        <a class="item" href="../example2-js-cpp/index.html#conclusion">Conclusion</a>
     </div>
     <a id="example3" class="item active">Example 3</a>
     <div class="menu">
         <a class="item" href="#demo">Demo</a>
         <a class="item" href="#specifications">Specifications</a>
         <a class="item" href="#prerequisites">Prerequisites</a>
-        <a class="item" href="#index">Index.html</a>
+        <a class="item" href="#WAM">Web Audio Modules</a>
+        <a class="item" href="#initialize">WAM SDK</a>
+        <a class="item" href="#creating">Instantiate plugins</a>
+        <a class="item" href="#processor">Custom WAM processor</a>
+        <a class="item" href="#conclusion">Conclusion</a>
     </div>
     <a href="../example4/index.html" id="example4" class="item">Example 4</a>
     <div class="menu">
         <a class="item" href="../example4/index.html#demo">Demo</a>
         <a class="item" href="../example4/index.html#specifications">Specifications</a>
         <a class="item" href="../example4/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example4/index.html#index">Index.html</a>
+        <a class="item" href="../example4/index.html#simulate">Simulate plugin automation</a>
+        <a class="item" href="../example4/index.html#connecting">Connecting WAM events</a>
+        <a class="item" href="../example4/index.html#handling">Handling events in processor</a>
+        <a class="item" href="../example4/index.html#conclusion">Conclusion</a>
     </div>
-    <a href="../example5/index.html" id="example5" class="item">Example 5</a>
-    <div class="menu">
-        <a class="item" href="../example5/index.html#demo">Demo</a>
-        <a class="item" href="../example5/index.html#specifications">Specifications</a>
-        <a class="item" href="../example5/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example5/index.html#index">Index.html</a>
+    <div class="item">
+        <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
+            <img src="../assets/images/github-logo-light.png" alt="logo wam" width="25px">
+        </a>
+        <a href="https://github.com/Brotherta/wam-examples">
+            <b>Github repository</b>
+        </a>
     </div>
-    <a href="https://github.com/Brotherta/wam-examples">
-        <div class="item">
-            <img src="/assets/images/github-logo.png" width="50%">
-        </div>
-    </a>
 </div>
 
 <div class="example-container">
 
     <h2 id="demo" class="ui dividing header">
-        Example : Simple JavaScript Web Audio Module 2.0 Processor
+        Example : Simple JavaScript Web Audio Modules 2.0 Processor
     </h2>
 
     <div class="loading">
@@ -105,39 +113,187 @@
             Specifications :
         </h3>
         <p>
-            This first example uses a simple audio worklet processor written in pure JavaScript. We can customize the processor by using the Web Audio API.
-            You will see how to customize your processor, how to host it, and play music with it.
+            In this example, we will use a simple JavaScript processor, to keep the code simple.
+            But of course, you can use the Web Assembly that we've seen in the example 2.
+            Before jumping into the code, be sure to check the
+            <a target="_blank" href="">Web Audio Modules API</a> first.
         </p>
 
         <h3 class="ui dividing header" id="prerequisites">
             Prerequisites :
         </h3>
         <p>
-            We only need standard JavaScript libraries.
-            The only prerequisite is to understand and read the official
-            <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio API</a>.
+            To make our host communicates with the plugin, we will use the
+            <a target="_blank" href="https://github.com/webaudiomodules/sdk">SDK</a> of Web Audio Modules.
+            You can either download the full source and build it on your own, or use the pre-build version.
         </p>
 
-        <h3 class="ui dividing header" id="index">
-            Create an index.html :
+        <h3 class="ui dividing header" id="WAM">
+            Web Audio Modules Environment :
         </h3>
+        <p>
+            In this example we want to use our processor. To achieve that, we need to overwrite the WebAudioModule.
+        </p>
         <pre class="code-snippets line-numbers">
-<code class="language-markup">&lt;!DOCTYPE html>
-&lt;html lang="en">
-&lt;head>
-&lt;meta charset="UTF-8">
-&lt;title>Simple Javascript Audio Processor&lt;/title>
-&lt;/head>
-&lt;body>
+<code class="language-js">// my-wam/js
 
-&lt;button id="btn-start" class="ui button">Start&lt;/button>
+import {WebAudioModule} from "../lib/sdk/index.js";
+import MyWamNode from "./wam-audio-player-node.js";
 
-&lt;scrip src="index.js">&lt;/scrip>
-&lt;/body>
-&lt;/html></code>
+
+export default class MyWam extends WebAudioModule {
+    /**
+     * @property {Function} createAudioNode
+     * @override
+     * @param initialState
+     * @return {Promise&lt;MyWamNode>}
+     */
+    async createAudioNode(initialState) {
+        await MyWamNode.addModules(this.moduleId);
+        const node = new MyWamNode(this);
+
+        // Initialize the node audio node. Register the processor in the audio context and the WAM group.
+        node._initialize();
+        return node;
+    }
+}
+</code>
 </pre>
         <p>
-            Simple index.html file. Nothing special about it. You can add everything you want to glow up your host.
+            At this point, we can now use the audio worklet and connect to the audio node of your processor.
+            But in our case, we will transform the processor into a processor that follows the web audio modules standards.
+        </p>
+        <p>
+            To use the processor, we will define the audio node. It extends WamNode.
+        </p>
+        <pre class="line-numbers">
+<code class="language-js">// wam-audio-player-node.js
+class MyWamNode extends WamNode {
+
+    static async addModules(moduleId) {
+        const {audioWorklet} = audioCtx;
+        await super.addModules(audioCtx, moduleId);
+        await addFunctionModule(audioWorklet, getProcessor, moduleId);
+    }
+
+    /* Code of the audio node
+    ...
+    */
+}
+</code>
+        </pre>
+        <p>
+            We will talk about the <b>getProcessor</b> function afterwards while defining the wam processor.
+            This functions will be called in the web audio modules class to register the custom processor.
+        </p>
+
+        <h3 class="ui dividing header" id="initialize">
+            Initialize the SDK :
+        </h3>
+        <p>
+            To work with WAM plugins, we need to keep the processor in the same group as the plugins.
+            By initializing the sdk we will get a unique host group id.
+        </p>
+        <p>
+            This host group id will be used when initializing the host and the plugins as follows :
+        </p>
+        <pre class="code-snippets line-numbers">
+<code class="language-js">// index.js
+
+(async ()=>{
+
+    const {default: initializeWamHost} = await import("./sdk/initializeWamHost.js");
+    const [hostGroupId] = await initializeWamHost(audioCtx);
+
+    const {default: MyWam} = await import("./my-wam.js");
+    const {default: WAM1} = await import(plugin1Url);
+    const {default: WAM2} = await import(plugin2Url);
+    /* Code of your host
+       ...
+    */
+})();
+</code>
+</pre>
+        <p>
+            We can now use the audio worklet and connect to the audio node of your processor.
+            But in our case, we will transform the processor into a processor that follows the web audio modules standards.
+        </p>
+
+        <h3 class="ui dividing header" id="creating">
+            Creating instance of the plugins :
+        </h3>
+        <p>
+            In the host, we can now instantiate the plugins and our wam environment.
+        </p>
+        <pre class="code-snippets line-numbers">
+<code class="language-js">// index.js
+
+(async ()=>{
+
+    /*
+       ...
+    */
+
+    let wamInstance = await MyWam.createInstance(hostGroupId, audioCtx);
+    let pluginInstance1 = await WAM1.createInstance(hostGroupId, audioCtx);
+    let pluginInstance2 = await WAM2.createInstance(hostGroupId, audioCtx);
+
+    node.connect(pluginInstance1._audioNode).connect(pluginInstance2._audioNode).connect(audioCtx.destination);
+
+    /* Code of your host
+       ...
+    */
+})();
+</code>
+</pre>
+        <p>
+            Now that the instances are created, we can connect them into the destination. The <b>node</b> is our WAM environment,
+            You can test the code with this, it will work properly, even with a simple audio worklet processor in JavaScript.
+            But as said before, we want to customize our processor, and make it follow the WAM standards.
+        </p>
+
+        <h3 class="ui dividing header" id="processor">
+            Custom Web Audio Modules processor :
+        </h3>
+        <p>
+            he WAM processor is the same as pure JavaScript apart from the registering method in the Audio Worklet.
+            In WAM the processor is registered in the GlobalScope of the Audio Worklet.
+            To give access to the options, you will need to define a function that returns your processors as follows :
+        </p>
+        <pre class="code-snippets line-numbers">
+<code class="language-js">// index.js
+
+const getProcessor = (moduleId) => {
+    const audioWorkletGlobalScope = globalThis;
+    const {registerProcessor} = audioWorkletGlobalScope;
+    const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+
+    class MyWamProcessor extends ModuleScope.WamProcessor {
+        // code of your processor goes here.
+    }
+
+    try {
+        registerProcessor(moduleId, MyWamProcessor);
+    } catch (error) {
+        console.warn(error);
+    }
+    return MyWamProcessor;
+}
+export default getProcessor;
+
+</code>
+</pre>
+        <h3 class="ui dividing header" id="conclusion">
+            Conclusion :
+        </h3>
+        <p>
+            We've created a custom processor that follows the Web Audio Modules standards. We've connected multiple plugins,
+            without effort to the host.
+        </p>
+        <p>
+            But now we want to add logic inside our processor.
+            To start with, we will see how to add parameters automation into the processor.
+            We will try to automatize a parameter of a plugin.
         </p>
     </section>
 </div>
