@@ -1,28 +1,24 @@
-
-#loading-gif {
-    height: 50px;
-    width: auto;
-}
-.wave {
-    height: 100px;
-    width: 600px;
-}
-
 canvas {
     border: 1px solid black;
     border-radius: 3px;
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
 }
 
-.example.plugin {
-    height: 590px;
+.wave {
+    height: 100px;
+    width: 600px;
 }
+
 
 .loading {
     height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+#loading-gif {
+    height: 50px;
+    width: auto;
 }
 
 .plugins {
@@ -33,6 +29,10 @@ canvas {
     width: 500px;
 }
 
+.example-container {
+    margin-left: 332px;
+}
+
 .example {
     display: flex;
     flex-direction: column;
@@ -40,8 +40,8 @@ canvas {
     height: 200px;
 }
 
-.example-container {
-    margin-left: 332px;
+.example.plugin {
+    height: 590px;
 }
 
 .tutorial {
@@ -78,7 +78,6 @@ pre {
 
 .ui.stackable.menu.huge {
     background-color: #FAFAFA;
-
 }
 
 .pusher {
