@@ -1,22 +1,28 @@
 import {drawBuffer} from "../lib/utils/drawer.js";
 import VuMeter from "./vu-meter.js";
 
-const audioUrl = "../assets/audio/BasketCaseGreendayriffDI.mp3";
-
-const audioCtx = new AudioContext();
+const audioUrl = "../assets/audio/Guitar.mp3";
 
 const btnStart = document.getElementById("btn-start");
 const inputLoop = document.getElementById("input-loop");
 const canvas = document.getElementById("canvas1");
 const vuMeterCanvas = document.getElementById("canvas2");
-const example = document.getElementById("example");
 
+const btnStartDemo = document.getElementById("btn-start-demo");
+const demoDiv = document.getElementById("demo-div");
+const widgetLoadingDiv = document.getElementById("widget-loading");
+const loadingWheelDiv = document.getElementById("loading-wheel")
 
-/**
- * Self-invoking asynchronous function to initialize the host.
- */
-(async () => {
+btnStartDemo.onclick = async () => {
+    btnStartDemo.style.display = "none";
+    demoDiv.style.display = "";
+    await startHost();
+}
+
+async function startHost() {
+    const audioCtx = new AudioContext();
     await audioCtx.suspend();
+
     const {default: OperableAudioBuffer} = await import("../lib/utils/operable-audio-buffer.js");
     const {default: AudioPlayerNode} = await import("./audio-player-node.js");
     const vuMeter = new VuMeter(vuMeterCanvas, 30, 200);
@@ -76,6 +82,7 @@ const example = document.getElementById("example");
             inputLoop.checked = true;
         }
     }
-    example.style.display = "";
-    document.querySelector(".loading").style.display = "none";
-})();
+
+    loadingWheelDiv.style.display = "none";
+    widgetLoadingDiv.style.display = "";
+}

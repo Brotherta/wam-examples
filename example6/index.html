@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Example 3 : Simple JavaScript Web Audio Module 2.0 Processor</title>
+    <title>Example 6 : Simple MIDI Keyboard</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/wam-logo.png">
     <link rel="stylesheet" type="text/css" href="../lib/fomantic-ui/semantic.css">
     <link rel="stylesheet" href="../lib/prism/prism.css">
@@ -47,16 +47,16 @@
         <a class="item" href="../example2-js-cpp/index.html#heaps">Initialize the heaps</a>
         <a class="item" href="../example2-js-cpp/index.html#conclusion">Conclusion</a>
     </div>
-    <a id="example3" class="item active">Example 3</a>
+    <a href="../example3/index.html" id="example3" class="item">Example 3</a>
     <div class="menu">
-        <a class="item" href="#demo">Demo</a>
-        <a class="item" href="#specifications">Specifications</a>
-        <a class="item" href="#prerequisites">Prerequisites</a>
-        <a class="item" href="#WAM">Web Audio Modules</a>
-        <a class="item" href="#initialize">WAM SDK</a>
-        <a class="item" href="#creating">Instantiate plugins</a>
-        <a class="item" href="#processor">Custom WAM processor</a>
-        <a class="item" href="#conclusion">Conclusion</a>
+        <a class="item" href="../example3/index.html#demo">Demo</a>
+        <a class="item" href="../example3/index.html#specifications">Specifications</a>
+        <a class="item" href="../example3/index.html#prerequisites">Prerequisites</a>
+        <a class="item" href="../example3/index.html#WAM">Web Audio Modules</a>
+        <a class="item" href="../example3/index.html#initialize">WAM SDK</a>
+        <a class="item" href="../example3/index.html#creating">Instantiate plugins</a>
+        <a class="item" href="../example3/index.html#processor">Custom WAM processor</a>
+        <a class="item" href="../example3/index.html#conclusion">Conclusion</a>
     </div>
     <a href="../example4/index.html" id="example4" class="item">Example 4</a>
     <div class="menu">
@@ -77,13 +77,13 @@
         <a class="item" href="../example5/index.html#receive">Receive data from the host</a>
         <a class="item" href="../example5/index.html#conclusion">Conclusion</a>
     </div>
-    <a href="../example6/index.html" id="example6" class="item active">Example 6</a>
+    <a id="example6" class="item active">Example 6</a>
     <div class="menu">
-        <a class="item" href="../example6/index.html#demo">Demo</a>
-        <a class="item" href="../example6/index.html#specifications">Specifications</a>
-        <a class="item" href="../example6/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example6/index.html#connection">Connection to MIDI</a>
-        <a class="item" href="../example6/index.html#conclusion">Conclusion</a>
+        <a class="item" href="#demo">Demo</a>
+        <a class="item" href="#specifications">Specifications</a>
+        <a class="item" href="#prerequisites">Prerequisites</a>
+        <a class="item" href="#connection">Connection to MIDI</a>
+        <a class="item" href="#conclusion">Conclusion</a>
     </div>
     <div class="item">
         <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
@@ -96,9 +96,8 @@
 </div>
 
 <div class="example-container">
-
     <h2 id="demo" class="ui dividing header">
-        Example : Simple JavaScript Web Audio Modules 2.0 Processor
+        Example : Simple MIDI Keyboard
     </h2>
 
     <button id="btn-start-demo" class="ui button">Start Demo</button>
@@ -109,22 +108,14 @@
         </div>
 
         <div id="widget-loading" style="display: none">
-            <h4 class="ui dividing header">Guitar Song : <a
-                    href="https://www.chosic.com/download-audio/29514/">https://www.chosic.com/download-audio/29514/</a>
-            </h4>
-            <div class="wave">
-                <canvas id="canvas1"></canvas>
-            </div>
-            <div class="demo-controls">
-                <button id="btn-start" class="ui button">Start</button>
-                <div class="ui toggle checkbox">
-                    <input type="checkbox" name="loop" id="input-loop">
-                    <label>Loop</label>
-                </div>
-            </div>
-            <div class="plugins">
-                <div id="mount1"></div>
+            <div class="synth">
                 <div id="mount2"></div>
+            </div>
+            <div class="keyboard">
+                <div id="mount1"></div>
+            </div>
+            <div class="vu-meter">
+                <canvas id="canvas2"></canvas>
             </div>
         </div>
     </div>
@@ -134,10 +125,8 @@
             Specifications :
         </h3>
         <p>
-            In this example, we will use a simple JavaScript processor, to keep the code simple.
-            But of course, you can use the Web Assembly that we've seen in the example 2.
-            Before jumping into the code, be sure to check the
-            <a target="_blank" href="">Web Audio Modules API</a> first.
+            Thanks to WAM, we will easily host a simple MIDI virtual keyboard and use the OBXD synthesizer. See the MIDI
+            section in the <a target="_blank" href="https://github.com/webaudiomodules/api">wiki</a> of the Web Audio Modules.
         </p>
 
         <h3 class="ui dividing header" id="prerequisites">
@@ -149,172 +138,46 @@
             You can either download the full source and build it on your own, or use the pre-build version.
         </p>
 
-        <h3 class="ui dividing header" id="WAM">
-            Web Audio Modules Environment :
+        <h3 class="ui dividing header" id="connection">
+            Connection of the plugins :
         </h3>
-        <p>
-            In this example we want to use our processor. To achieve that, we need to overwrite the WebAudioModule.
-        </p>
-        <pre class="code-snippets line-numbers">
-<code class="language-js">// my-wam/js
+<pre class="line-numbers">
+<code class="language-js">// index.js
 
-import {WebAudioModule} from "../lib/sdk/index.js";
-import MyWamNode from "./wam-audio-player-node.js";
-
-
-export default class MyWam extends WebAudioModule {
-    /**
-     * @property {Function} createAudioNode
-     * @override
-     * @param initialState
-     * @return {Promise&lt;MyWamNode>}
-     */
-    async createAudioNode(initialState) {
-        await MyWamNode.addModules(this.moduleId);
-        const node = new MyWamNode(this);
-
-        // Initialize the node audio node. Register the processor in the audio context and the WAM group.
-        node._initialize();
-        return node;
-    }
-}
-</code>
-</pre>
-        <p>
-            At this point, we can now use the audio worklet and connect to the audio node of your processor.
-            But in our case, we will transform the processor into a processor that follows the web audio modules standards.
-        </p>
-        <p>
-            To use the processor, we will define the audio node. It extends WamNode.
-        </p>
-        <pre class="line-numbers">
-<code class="language-js">// wam-audio-player-node.js
-class MyWamNode extends WamNode {
-
-    static async addModules(moduleId) {
-        const {audioWorklet} = audioCtx;
-        await super.addModules(audioCtx, moduleId);
-        await addFunctionModule(audioWorklet, getProcessor, moduleId);
-    }
-
-    /* Code of the audio node
+(async () => {
     ...
-    */
-}
-</code>
-        </pre>
-        <p>
-            We will talk about the <b>getProcessor</b> function afterwards while defining the wam processor.
-            This functions will be called in the web audio modules class to register the custom processor.
-        </p>
 
-        <h3 class="ui dividing header" id="initialize">
-            Initialize the SDK :
-        </h3>
-        <p>
-            To work with WAM plugins, we need to keep the processor in the same group as the plugins.
-            By initializing the sdk we will get a unique host group id.
-        </p>
-        <p>
-            This host group id will be used when initializing the host and the plugins as follows :
-        </p>
-        <pre class="code-snippets line-numbers">
-<code class="language-js">// index.js
+    let gain = audioCtx.createGain();
 
-(async ()=>{
+    let keyboardInstance = await WAM1.createInstance(hostGroupId, audioCtx);
+    let keyboardDom = await keyboardInstance.createGui();
 
-    const {default: initializeWamHost} = await import("./sdk/initializeWamHost.js");
-    const [hostGroupId] = await initializeWamHost(audioCtx);
+    let obxdInstance = await WAM2.createInstance(hostGroupId, audioCtx);
+    let pluginDom2 = await obxdInstance.createGui();
 
-    const {default: MyWam} = await import("./my-wam.js");
-    const {default: WAM1} = await import(plugin1Url);
-    const {default: WAM2} = await import(plugin2Url);
-    /* Code of your host
-       ...
-    */
+    obxdInstance.audioNode.connect(gain).connect(audioCtx.destination);
+    obxdInstance.audioNode.connect(keyboardInstance.audioNode);
+    keyboardInstance.audioNode.connectEvents(obxdInstance.instanceId);
+
+    ...
 })();
 </code>
 </pre>
         <p>
-            We can now use the audio worklet and connect to the audio node of your processor.
-            But in our case, we will transform the processor into a processor that follows the web audio modules standards.
+            In order to make sound with the OBXD synthesizer, we have to create a gain node.
+            This gain node is connected to the output destination, and receive in output the sound from the synthesizer.
+            The input of the obxd synthesizer is connected to the keyboard. Then, thanks to WAM, we can add to the synthesizer,
+            the event handler of midi events with the <b>connectEvents</b> method.
         </p>
 
-        <h3 class="ui dividing header" id="creating">
-            Creating instance of the plugins :
-        </h3>
-        <p>
-            In the host, we can now instantiate the plugins and our wam environment.
-        </p>
-        <pre class="code-snippets line-numbers">
-<code class="language-js">// index.js
-
-(async ()=>{
-
-    /*
-       ...
-    */
-
-    let wamInstance = await MyWam.createInstance(hostGroupId, audioCtx);
-    let pluginInstance1 = await WAM1.createInstance(hostGroupId, audioCtx);
-    let pluginInstance2 = await WAM2.createInstance(hostGroupId, audioCtx);
-
-    node.connect(pluginInstance1._audioNode).connect(pluginInstance2._audioNode).connect(audioCtx.destination);
-
-    /* Code of your host
-       ...
-    */
-})();
-</code>
-</pre>
-        <p>
-            Now that the instances are created, we can connect them into the destination. The <b>node</b> is our WAM environment,
-            You can test the code with this, it will work properly, even with a simple audio worklet processor in JavaScript.
-            But as said before, we want to customize our processor, and make it follow the WAM standards.
-        </p>
-
-        <h3 class="ui dividing header" id="processor">
-            Custom Web Audio Modules processor :
-        </h3>
-        <p>
-            he WAM processor is the same as pure JavaScript apart from the registering method in the Audio Worklet.
-            In WAM the processor is registered in the GlobalScope of the Audio Worklet.
-            To give access to the options, you will need to define a function that returns your processors as follows :
-        </p>
-        <pre class="code-snippets line-numbers">
-<code class="language-js">// index.js
-
-const getProcessor = (moduleId) => {
-    const audioWorkletGlobalScope = globalThis;
-    const {registerProcessor} = audioWorkletGlobalScope;
-    const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
-
-    class MyWamProcessor extends ModuleScope.WamProcessor {
-        // code of your processor goes here.
-    }
-
-    try {
-        registerProcessor(moduleId, MyWamProcessor);
-    } catch (error) {
-        console.warn(error);
-    }
-    return MyWamProcessor;
-}
-export default getProcessor;
-
-</code>
-</pre>
         <h3 class="ui dividing header" id="conclusion">
             Conclusion :
         </h3>
         <p>
-            We've created a custom processor that follows the Web Audio Modules standards. We've connected multiple plugins,
-            without effort to the host.
+            We've seen how to connect a keyboard to a synthesizer with Web Audio Modules.
         </p>
         <p>
-            But now we want to add logic inside our processor.
-            To start with, we will see how to add parameters automation into the processor.
-            We will try to automatize a parameter of a plugin.
+            In a next step, we will see how to create a piano roll, and how to store the wam midi events.
         </p>
     </section>
 </div>

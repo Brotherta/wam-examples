@@ -83,3 +83,17 @@ pre {
 .pusher {
     width: auto;
 }
+
+.keyboard {
+    width: 80%;
+    padding-top: 20px;
+}
+
+.synth {
+    height: 340px;
+    padding-top: 20px;
+}
+
+.demo-controls {
+    margin: 10px;
+}

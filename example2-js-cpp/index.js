@@ -9,6 +9,11 @@ const inputLoop = document.getElementById("input-loop");
 const canvas = document.getElementById("canvas1");
 const example = document.getElementById("example");
 
+const btnStartDemo = document.getElementById("btn-start-demo");
+const demoDiv = document.getElementById("demo-div");
+const widgetLoadingDiv = document.getElementById("widget-loading");
+const loadingWheelDiv = document.getElementById("loading-wheel")
+
 let moduleWasm;
 
 /**
@@ -20,10 +25,15 @@ async function loadWasm() {
         .then(module => moduleWasm = module);
 }
 
-/**
- * Self-invoking asynchronous function to initialize the host.
- */
-(async () => {
+btnStartDemo.onclick = async () => {
+    btnStartDemo.style.display = "none";
+    demoDiv.style.display = "";
+    await startHost();
+}
+
+async function startHost() {
+    const audioCtx = new AudioContext();
+    await audioCtx.suspend();
     await loadWasm();
     const {default: OperableAudioBuffer} = await import("../lib/utils/operable-audio-buffer.js");
     const {default: AudioPlayerNode} = await import("./js/audio-player-node.js");
@@ -73,6 +83,7 @@ async function loadWasm() {
             inputLoop.checked = true;
         }
     }
-    example.style.display = "";
-    document.querySelector(".loading").style.display = "none";
-})();
+
+    loadingWheelDiv.style.display = "none";
+    widgetLoadingDiv.style.display = "";
+}

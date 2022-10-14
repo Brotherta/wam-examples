@@ -5,7 +5,7 @@ const audioUrl = "../assets/audio/Guitar.mp3";
 const plugin1Url = "https://mainline.i3s.unice.fr/wam2/packages/StonePhaserStereo/index.js";
 const plugin2Url = "https://mainline.i3s.unice.fr/wam2/packages/BigMuff/index.js";
 
-export const audioCtx = new AudioContext();
+export let audioCtx;
 
 const btnStart = document.getElementById("btn-start");
 const btnRestart = document.getElementById("btn-restart");
@@ -13,10 +13,19 @@ const inputLoop = document.getElementById("input-loop");
 const canvas = document.getElementById("canvas1");
 const example = document.getElementById("example");
 
-/**
- * Self-invoking asynchronous function to initialize the host.
- */
-(async () => {
+const btnStartDemo = document.getElementById("btn-start-demo");
+const demoDiv = document.getElementById("demo-div");
+const widgetLoadingDiv = document.getElementById("widget-loading");
+const loadingWheelDiv = document.getElementById("loading-wheel")
+
+btnStartDemo.onclick = async () => {
+    btnStartDemo.style.display = "none";
+    demoDiv.style.display = "";
+    await startHost();
+}
+
+async function startHost() {
+    audioCtx = new AudioContext();
     await audioCtx.suspend();
     /* Import from the Web Audio Modules 2.0 SDK to initialize Wam Host.
     It initializes a unique ID for the current AudioContext. */
@@ -113,6 +122,7 @@ const example = document.getElementById("example");
             inputLoop.checked = true;
         }
     }
-    example.style.display = "";
-    document.querySelector(".loading").style.display = "none";
-})();
+
+    loadingWheelDiv.style.display = "none";
+    widgetLoadingDiv.style.display = "";
+}

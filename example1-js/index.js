@@ -2,21 +2,28 @@ import {drawBuffer} from "../lib/utils/drawer.js";
 
 const audioUrl = "../assets/audio/Guitar.mp3";
 
-const audioCtx = new AudioContext();
-
 const btnStart = document.getElementById("btn-start");
 const inputLoop = document.getElementById("input-loop");
 const canvas = document.getElementById("canvas1");
-const example = document.getElementById("example");
 
+const btnStartDemo = document.getElementById("btn-start-demo");
+const demoDiv = document.getElementById("demo-div");
+const widgetLoadingDiv = document.getElementById("widget-loading");
+const loadingWheelDiv = document.getElementById("loading-wheel")
+
+btnStartDemo.onclick = async () => {
+    btnStartDemo.style.display = "none";
+    demoDiv.style.display = "";
+    await startHost();
+}
 
 /**
  * Self-invoking asynchronous function to initialize the host.
  */
-(async () => {
+async function startHost() {
     const {default: OperableAudioBuffer} = await import("../lib/utils/operable-audio-buffer.js");
     const {default: AudioPlayerNode} = await import("./audio-player-node.js");
-
+    const audioCtx = new AudioContext();
     // Register our custom JavaScript processor in the current audio worklet.
     await audioCtx.audioWorklet.addModule("./audio-player-processor.js");
 
@@ -60,6 +67,6 @@ const example = document.getElementById("example");
             inputLoop.checked = true;
         }
     }
-    example.style.display = "";
-    document.querySelector(".loading").style.display = "none";
-})();
+    loadingWheelDiv.style.display = "none";
+    widgetLoadingDiv.style.display = "";
+}
