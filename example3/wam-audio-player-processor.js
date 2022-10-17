@@ -10,7 +10,7 @@ const getProcessor = (moduleId) => {
     /** @type {AudioWorkletGlobalScope} */
     const audioWorkletGlobalScope = globalThis;
     const {registerProcessor} = audioWorkletGlobalScope;
-
+    const PLAYHEAD_COUNT_MAX = 8;
     const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 
     /**
@@ -43,6 +43,7 @@ const getProcessor = (moduleId) => {
             this.audio = null;
             /** @type {number} */
             this.playhead = 0;
+            this.playheadCount = 0;
             /** @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e */
             this.port.onmessage = (e) => {
                 if (e.data.audio) {
@@ -83,6 +84,13 @@ const getProcessor = (moduleId) => {
                 }
                 this.playhead++;
             }
+
+            this.playheadCount++;
+            if (this.playheadCount >= PLAYHEAD_COUNT_MAX) {
+                this.port.postMessage({playhead: this.playhead});
+                this.playheadCount = 0;
+            }
+
             return true;
         }
     }

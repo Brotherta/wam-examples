@@ -10,6 +10,9 @@ const MAX_CHANNEL_COUNT = 32;
 // WebAudio's render quantum size.
 const RENDER_QUANTUM_FRAMES = 128;
 
+const PLAYHEAD_COUNT_MAX = 8;
+
+
 /**
  * @class
  * @extends {AudioWorkletProcessor}
@@ -52,6 +55,7 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
          * @property {number} playhea Current position in the audio buffer.
          */
         this.playhead = 0;
+        this.playheadCount = 0;
 
         /**
          * @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e
@@ -167,6 +171,11 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
                 );
             }
 
+            this.playheadCount++;
+            if (this.playheadCount >= PLAYHEAD_COUNT_MAX) {
+                this.port.postMessage({playhead: this.playhead});
+                this.playheadCount = 0;
+            }
             this.playhead++;
         }
         return true;

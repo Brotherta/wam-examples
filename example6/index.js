@@ -1,4 +1,4 @@
-import VuMeter from "../example5/vu-meter.js";
+import VuMeter from "../lib/utils/vu-meter.js";
 
 const plugin1Url = "https://mainline.i3s.unice.fr/wam2/packages/simpleMidiKeyboard/index.js";
 const plugin2Url = "https://mainline.i3s.unice.fr/wam2/packages/obxd/index.js";

@@ -1,12 +1,13 @@
-import {drawBuffer} from "../lib/utils/drawer.js";
-import VuMeter from "./vu-meter.js";
+import {drawBuffer, Playhead} from "../lib/utils/drawer.js";
+import VuMeter from "../lib/utils/vu-meter.js";
 
 const audioUrl = "../assets/audio/Guitar.mp3";
 
 const btnStart = document.getElementById("btn-start");
 const inputLoop = document.getElementById("input-loop");
-const canvas = document.getElementById("canvas1");
+const waveCanvas = document.getElementById("canvas1");
 const vuMeterCanvas = document.getElementById("canvas2");
+const playheadCanvas = document.getElementById("playhead");
 
 const btnStartDemo = document.getElementById("btn-start-demo");
 const demoDiv = document.getElementById("demo-div");
@@ -35,27 +36,40 @@ async function startHost() {
     const audioArrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(audioArrayBuffer);
 
-    //Transform the audio buffer into a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example, editing...)
+    // Transforming the audio buffer into a custom audio buffer to add logic inside. (Needed to manipulate the audio, for example, editing...)
     const operableAudioBuffer = Object.setPrototypeOf(audioBuffer, OperableAudioBuffer.prototype);
     const node = new AudioPlayerNode(audioCtx, 2);
 
+    // Set handlers for the message sent by the processor.
+    let curPos = 0;
     node.port.onmessage = ev => {
         let vol = 0;
         let sensitivity = 1.3;
         if (ev.data.volume) {
             vol = ev.data.volume;
+            vuMeter.update(Math.abs(vol) * sensitivity);
         }
-        vuMeter.update(Math.abs(vol) * sensitivity);
+        if (ev.data.playhead) {
+            curPos = ev.data.playhead;
+        }
     }
 
-    // Draw the waveform in the canvas.
-    drawBuffer(canvas, audioBuffer, "blue", 600, 100);
+    // Drawing the waveform in the canvas.
+    drawBuffer(waveCanvas, audioBuffer, "blue", 600, 100);
+    let playhead = new Playhead(playheadCanvas, waveCanvas, audioBuffer.length);
 
-    //Sending audio to the processor and connecting the node to the output destination.
+    // Sending audio to the processor and connecting the node to the output destination.
     node.setAudio(operableAudioBuffer.toArray());
     node.connect(audioCtx.destination);
     node.parameters.get("playing").value = 0;
     node.parameters.get("loop").value = 1;
+
+    // Updating the play head position.
+    setInterval(()=>{
+        if(audioCtx.state === "running") {
+            playhead.update(curPos)
+        }
+    },16);
 
     // Connecting host's logic of the page.
     btnStart.onclick = () => {

@@ -2,6 +2,8 @@
 const {registerProcessor, sampleRate} = globalThis;
 
 const COUNT_BLOCK = 8;
+const PLAYHEAD_COUNT_MAX = 8;
+
 /**
  * @class
  * @extends {AudioWorkletProcessor}
@@ -43,6 +45,8 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
          * @property {number} playhea Current position in the audio buffer.
          */
         this.playhead = 0;
+        this.playheadCount = 0;
+
         /**
          * @param {MessageEvent<{ audio?: Float32Array[]; position?: number }>} e
          * Define listeners to handle messages of the host. There we listen for the decoded audio buffer.
@@ -102,8 +106,14 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
             }
             this.playhead++;
         }
-        //this.calculateAverage(output[0]);
+
+        // Logic to update the vu-meter and the playhead position.
         this.calculateMax(output[0]);
+        this.playheadCount++;
+        if (this.playheadCount >= PLAYHEAD_COUNT_MAX) {
+            this.port.postMessage({playhead: this.playhead});
+            this.playheadCount = 0;
+        }
         return true;
     }
 }

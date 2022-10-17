@@ -1,12 +1,34 @@
-canvas {
+.wave .waveform {
+    border: 1px solid black;
+    border-radius: 3px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+.wave .playhead {
+    border: 1px solid black;
+    border-radius: 3px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+}
+
+.vu-meter canvas{
     border: 1px solid black;
     border-radius: 3px;
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
 }
 
 .wave {
-    height: 100px;
-    width: 600px;
+    height: 111px;
+    width: 611px;
+    position: relative;
+    z-index: -10;
+    overflow: hidden;
 }
 
 
@@ -16,6 +38,7 @@ canvas {
     align-items: center;
     justify-content: center;
 }
+
 #loading-gif {
     height: 50px;
     width: auto;
