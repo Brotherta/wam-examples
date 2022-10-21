@@ -56,3 +56,5 @@ function normalizePoints(points, minValue, maxValue, defValue, duration, step) {
     normalizedPoints.push(points[pointIndex+1]);
     return normalizedPoints;
 }
+
+export {normalizePoints};

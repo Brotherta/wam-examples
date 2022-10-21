@@ -1,4 +1,5 @@
 import {audioCtx} from "./index.js";
+import {normalizePoints} from "../lib/utils/normalize-points.js";
 
 /**
  * Sends to the processor the automation events.

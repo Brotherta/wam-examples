@@ -1,0 +1,10 @@
+version: "3.5"
+
+services:
+  wam:
+    image: wam-example
+    restart: unless-stopped
+    ports:
+      - "4998:4998"
+    build: .
+    command: node wam-example.js

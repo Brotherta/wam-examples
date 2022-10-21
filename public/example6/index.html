@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example 6 : Simple MIDI Keyboard</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/wam-logo.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.0/dist/semantic.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/combine/npm/prismjs@1.29.0/themes/prism.min.css,npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+    <link rel="stylesheet" type="text/css" href="../lib/css/style.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.0/dist/semantic.min.js"></script>
+</head>
+<body>
+
+<div class="ui visible left sidebar inverted vertical menu">
+    <div class="item">
+        <a class="ui logo icon image" href="/index.html">
+            <img src="../assets/images/wam-logo.png" alt="logo wam" width="50px">
+        </a>
+        <a href="https://github.com/webaudiomodules">
+            <b>Web Audio Modules</b>
+        </a>
+    </div>
+
+    <a href="../example1-js/index.html" id="example1" class="item">Example 1</a>
+    <div class="menu">
+        <a class="item" href="../example1-js/index.html#demo">Demo</a>
+        <a class="item" href="../example1-js/index.html#specifications">Specifications</a>
+        <a class="item" href="../example1-js/index.html#prerequisites">Prerequisites</a>
+        <a class="item" href="../example1-js/index.html#index">Index.html</a>
+        <a class="item" href="../example1-js/index.html#operable">Operable audio buffer</a>
+        <a class="item" href="../example1-js/index.html#main">Main script</a>
+        <a class="item" href="../example1-js/index.html#init">Initialization</a>
+        <a class="item" href="../example1-js/index.html#connection">Audio node connection</a>
+        <a class="item" href="../example1-js/index.html#processor">Audio processor</a>
+        <a class="item" href="../example1-js/index.html#conclusion">Conclusion</a>
+    </div>
+    <a href="../example2-js-cpp/index.html" id="example2" class="item">Example 2</a>
+    <div class="menu">
+        <a class="item" href="../example2-js-cpp/index.html#demo">Demo</a>
+        <a class="item" href="../example2-js-cpp/index.html#specifications">Specifications</a>
+        <a class="item" href="../example2-js-cpp/index.html#prerequisites">Prerequisites</a>
+        <a class="item" href="../example2-js-cpp/index.html#makefile">Makefile compiling Emscripten</a>
+        <a class="item" href="../example2-js-cpp/index.html#cpp">C++ File</a>
+        <a class="item" href="../example2-js-cpp/index.html#audio-node">Custom Audio Node</a>
+        <a class="item" href="../example2-js-cpp/index.html#instantiate">Instantiate Web Assembly</a>
+        <a class="item" href="../example2-js-cpp/index.html#heaps">Initialize the heaps</a>
+        <a class="item" href="../example2-js-cpp/index.html#conclusion">Conclusion</a>
+    </div>
+    <a href="../example3/index.html" id="example3" class="item">Example 3</a>
+    <div class="menu">
+        <a class="item" href="../example3/index.html#demo">Demo</a>
+        <a class="item" href="../example3/index.html#specifications">Specifications</a>
+        <a class="item" href="../example3/index.html#prerequisites">Prerequisites</a>
+        <a class="item" href="../example3/index.html#WAM">Web Audio Modules</a>
+        <a class="item" href="../example3/index.html#initialize">WAM SDK</a>
+        <a class="item" href="../example3/index.html#creating">Instantiate plugins</a>
+        <a class="item" href="../example3/index.html#processor">Custom WAM processor</a>
+        <a class="item" href="../example3/index.html#conclusion">Conclusion</a>
+    </div>
+    <a href="../example4/index.html" id="example4" class="item">Example 4</a>
+    <div class="menu">
+        <a class="item" href="../example4/index.html#demo">Demo</a>
+        <a class="item" href="../example4/index.html#specifications">Specifications</a>
+        <a class="item" href="../example4/index.html#prerequisites">Prerequisites</a>
+        <a class="item" href="../example4/index.html#simulate">Simulate plugin automation</a>
+        <a class="item" href="../example4/index.html#connecting">Connecting WAM events</a>
+        <a class="item" href="../example4/index.html#handling">Handling events in processor</a>
+        <a class="item" href="../example4/index.html#conclusion">Conclusion</a>
+    </div>
+    <a href="../example5/index.html" id="example5" class="item">Example 5</a>
+    <div class="menu">
+        <a class="item" href="../example5/index.html#demo">Demo</a>
+        <a class="item" href="../example5/index.html#specifications">Specifications</a>
+        <a class="item" href="../example5/index.html#vu-meter">Vu meter class</a>
+        <a class="item" href="../example5/index.html#send">Sending data from the processor</a>
+        <a class="item" href="../example5/index.html#receive">Receive data from the host</a>
+        <a class="item" href="../example5/index.html#conclusion">Conclusion</a>
+    </div>
+    <a id="example6" class="item active">Example 6</a>
+    <div class="menu">
+        <a class="item" href="#demo">Demo</a>
+        <a class="item" href="#specifications">Specifications</a>
+        <a class="item" href="#prerequisites">Prerequisites</a>
+        <a class="item" href="#connection">Connection to MIDI</a>
+        <a class="item" href="#conclusion">Conclusion</a>
+    </div>
+    <div class="item">
+        <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
+            <img src="../assets/images/github-logo-light.png" alt="logo wam" width="25px">
+        </a>
+        <a href="https://github.com/Brotherta/wam-examples">
+            <b>Github repository</b>
+        </a>
+    </div>
+</div>
+
+<div class="example-container">
+    <h2 id="demo" class="ui dividing header">
+        Example : Simple MIDI Keyboard
+    </h2>
+
+    <button id="btn-start-demo" class="ui button">Start Demo</button>
+
+    <div id="demo-div" style="display: none">
+        <div id="loading-wheel" class="loading">
+            <img id="loading-gif" src="../assets/images/circle-loading.gif" alt="loading">
+        </div>
+
+        <div id="widget-loading" style="display: none">
+            <div class="synth">
+                <div id="mount2"></div>
+            </div>
+            <div class="keyboard">
+                <div id="mount1"></div>
+            </div>
+            <div class="vu-meter">
+                <canvas id="canvas2"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <section class="tutorial">
+        <h3 class="ui dividing header" id="specifications">
+            Specifications :
+        </h3>
+        <p>
+            Thanks to WAM, we will easily host a simple MIDI virtual keyboard and use the OBXD synthesizer. See the MIDI
+            section in the <a target="_blank" href="https://github.com/webaudiomodules/api">wiki</a> of the Web Audio Modules.
+        </p>
+
+        <h3 class="ui dividing header" id="prerequisites">
+            Prerequisites :
+        </h3>
+        <p>
+            To make our host communicates with the plugin, we will use the
+            <a target="_blank" href="https://github.com/webaudiomodules/sdk">SDK</a> of Web Audio Modules.
+            You can either download the full source and build it on your own, or use the pre-build version.
+        </p>
+
+        <h3 class="ui dividing header" id="connection">
+            Connection of the plugins :
+        </h3>
+<pre class="line-numbers">
+<code class="language-js">// index.js
+
+(async () => {
+    ...
+
+    let gain = audioCtx.createGain();
+
+    let keyboardInstance = await WAM1.createInstance(hostGroupId, audioCtx);
+    let keyboardDom = await keyboardInstance.createGui();
+
+    let obxdInstance = await WAM2.createInstance(hostGroupId, audioCtx);
+    let pluginDom2 = await obxdInstance.createGui();
+
+    obxdInstance.audioNode.connect(gain).connect(audioCtx.destination);
+    obxdInstance.audioNode.connect(keyboardInstance.audioNode);
+    keyboardInstance.audioNode.connectEvents(obxdInstance.instanceId);
+
+    ...
+})();
+</code>
+</pre>
+        <p>
+            In order to make sound with the OBXD synthesizer, we have to create a gain node.
+            This gain node is connected to the output destination, and receive in output the sound from the synthesizer.
+            The input of the obxd synthesizer is connected to the keyboard. Then, thanks to WAM, we can add to the synthesizer,
+            the event handler of midi events with the <b>connectEvents</b> method.
+        </p>
+
+        <h3 class="ui dividing header" id="conclusion">
+            Conclusion :
+        </h3>
+        <p>
+            We've seen how to connect a keyboard to a synthesizer with Web Audio Modules.
+        </p>
+        <p>
+            In a next step, we will see how to create a piano roll, and how to store the wam midi events.
+        </p>
+    </section>
+</div>
+
+<div class="ui vertical footer segment">
+    <div class="ui center aligned container">
+        <div class="ui stackable grid">
+            <div class="three wide column">
+                <h4 class="ui header">Community</h4>
+                <div class="ui link list">
+                    <a class="item" href="https://github.com/webaudiomodules/api" target="_blank">Help contribute</a>
+                    <a class="item" href="https://github.com/webaudiomodules/api/issues" target="_blank">Submit an
+                        Issue</a>
+                    <a class="item" href="https://gitter.im/Semantic-Org/Semantic-UI" target="_blank">Join our Chat</a>
+                    <a class="item" href="https://www.webaudiomodules.org/">Community Website</a>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui header">Network</h4>
+                <div class="ui link list">
+                    <a class="item" href="https://github.com/webaudiomodules/api" target="_blank">GitHub Repo</a>
+                    <a class="item" href="https://www.w3.org/groups/wg/audio" target="_blank">W3C Audio Working
+                        Groupe</a>
+                    <a class="item" href="https://github.com/webaudiomodules/wam-examples/wiki">SDK Wiki</a>
+                </div>
+            </div>
+            <div class="seven wide right floated column">
+                <h4 class="ui header">Help to contibute to this project</h4>
+                <form action="https://github.com/webaudiomodules"></form>
+                <button type="submit" class="ui large orange button">Contribute to Web Audio Modules</button>
+            </div>
+        </div>
+        <div class="ui section divider"></div>
+        <img src="/public/assets/images/wam-logo.png" class="ui centered mini image">
+        <div class="ui horizontal small divided link list">
+            <a class="item" href="https://github.com/webaudiomodules/wam-examples/blob/master/LICENSE" target="_blank">Free
+                &amp; Open Source (MIT)</a>
+        </div>
+    </div>
+</div>
+
+<script src="./index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/combine/npm/prismjs@1.29.0,npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+</body>
+</html>

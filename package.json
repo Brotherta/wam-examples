@@ -1,0 +1,22 @@
+{
+  "name": "wam-examples",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">   <a href=\"https://example.com/\">     <img src=\"assets/images/wam-logo.png\" alt=\"Logo\" width=100 height=100>   </a>",
+  "main": "wam-example.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Brotherta/wam-examples.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Brotherta/wam-examples/issues"
+  },
+  "homepage": "https://github.com/Brotherta/wam-examples#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

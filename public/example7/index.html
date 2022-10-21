@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Example 5 : Vu Meter</title>
+    <title>Example 7 : Simple MIDI Piano Roll</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/wam-logo.png">
-    <link rel="stylesheet" type="text/css" href="../lib/fomantic-ui/semantic.css">
-    <link rel="stylesheet" href="../lib/prism/prism.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.0/dist/semantic.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/combine/npm/prismjs@1.29.0/themes/prism.min.css,npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
     <link rel="stylesheet" type="text/css" href="../lib/css/style.css">
-    <script src="../lib/jquery/jquery-3.6.1.min.js"></script>
-    <script src="../lib/fomantic-ui/semantic.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.0/dist/semantic.min.js"></script>
 </head>
 <body>
 
@@ -68,22 +70,22 @@
         <a class="item" href="../example4/index.html#handling">Handling events in processor</a>
         <a class="item" href="../example4/index.html#conclusion">Conclusion</a>
     </div>
-    <a id="example5" class="active item">Example 5</a>
+    <a href="../example5/index.html" id="example5" class="item">Example 5</a>
+    <div class="menu">
+        <a class="item" href="../example5/index.html#demo">Demo</a>
+        <a class="item" href="../example5/index.html#specifications">Specifications</a>
+        <a class="item" href="../example5/index.html#vu-meter">Vu meter class</a>
+        <a class="item" href="../example5/index.html#send">Sending data from the processor</a>
+        <a class="item" href="../example5/index.html#receive">Receive data from the host</a>
+        <a class="item" href="../example5/index.html#conclusion">Conclusion</a>
+    </div>
+    <a id="example6" class="item active">Example 6</a>
     <div class="menu">
         <a class="item" href="#demo">Demo</a>
         <a class="item" href="#specifications">Specifications</a>
-        <a class="item" href="#vu-meter">Vu meter class</a>
-        <a class="item" href="#send">Sending data from the processor</a>
-        <a class="item" href="#receive">Receive data from the host</a>
+        <a class="item" href="#prerequisites">Prerequisites</a>
+        <a class="item" href="#connection">Connection to MIDI</a>
         <a class="item" href="#conclusion">Conclusion</a>
-    </div>
-    <a href="../example6/index.html" id="example6" class="item active">Example 6</a>
-    <div class="menu">
-        <a class="item" href="../example6/index.html#demo">Demo</a>
-        <a class="item" href="../example6/index.html#specifications">Specifications</a>
-        <a class="item" href="../example6/index.html#prerequisites">Prerequisites</a>
-        <a class="item" href="../example6/index.html#connection">Connection to MIDI</a>
-        <a class="item" href="../example6/index.html#conclusion">Conclusion</a>
     </div>
     <div class="item">
         <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
@@ -97,7 +99,7 @@
 
 <div class="example-container">
     <h2 id="demo" class="ui dividing header">
-        Example : Simple Vu Meter
+        Example : Simple MIDI Keyboard
     </h2>
 
     <button id="btn-start-demo" class="ui button">Start Demo</button>
@@ -108,19 +110,11 @@
         </div>
 
         <div id="widget-loading" style="display: none">
-            <h4 class="ui dividing header">Guitar Song : <a
-                    href="https://www.chosic.com/download-audio/29514/">https://www.chosic.com/download-audio/29514/</a>
-            </h4>
-            <div class="wave">
-                <canvas class="waveform" id="canvas1"></canvas>
-                <canvas class="playhead" id="playhead"></canvas>
+            <div class="synth">
+                <div id="mount2"></div>
             </div>
-            <div class="demo-controls">
-                <button id="btn-start" class="ui button">Start</button>
-                <div class="ui toggle checkbox">
-                    <input type="checkbox" name="loop" id="input-loop">
-                    <label>Loop</label>
-                </div>
+            <div class="keyboard">
+                <div id="mount1"></div>
             </div>
             <div class="vu-meter">
                 <canvas id="canvas2"></canvas>
@@ -133,134 +127,59 @@
             Specifications :
         </h3>
         <p>
-            This example demonstrates how to communicate real-time data from the processor to the host. It requires using
-            the postMessage method.
+            Thanks to WAM, we will easily host a simple MIDI virtual keyboard and use the OBXD synthesizer. See the MIDI
+            section in the <a target="_blank" href="https://github.com/webaudiomodules/api">wiki</a> of the Web Audio Modules.
         </p>
 
-        <h3 class="ui dividing header" id="vu-meter">
-            Vu-meter class :
+        <h3 class="ui dividing header" id="prerequisites">
+            Prerequisites :
         </h3>
         <p>
-            We will create a simple canvas with a gradient rule for the style. Nothing particular in this code.
-        </p>
-<pre class="code-snippets line-numbers">
-<code class="language-js">// vu-meter.js
-class VuMeter {
-
-    constructor(canvas, height, width) {
-        this.canvas = canvas;
-        this.canvas.height = height;
-        this.canvas.width = width;
-        this.ctx = this.canvas.getContext("2d")
-
-        let gradient = this.ctx.createLinearGradient(0,0, width, height);
-        gradient.addColorStop(0, "#08ff00");
-        gradient.addColorStop(0.33, "#fffb00");
-        gradient.addColorStop(0.66, "#ff7300");
-        gradient.addColorStop(1, "#ff0000");
-
-        this.ctx.fillStyle = gradient;
-        this.ctx.clearRect(0,0,width,height);
-    }
-
-    update(value) {
-        value = Math.min(value, 1);
-        this.ctx.clearRect(0,0, this.canvas.width, this.canvas.height);
-        this.ctx.fillRect(0, 0, value*this.canvas.width, this.canvas.height);
-    }
-}
-</code>
-</pre>
-
-        <h3 class="ui dividing header" id="send">
-            Sending data from the processor :
-        </h3>
-        <p>
-            We want to minimize the call to the update function of the vu-meter.
-            That's why we will not send a message after each call of the process method in the processor.
-        </p>
-<pre class="line-numbers">
-<code class="language-js">// audio-player-processor.js
-
-const COUNT_BLOCK = 8;
-
-class AudioPlayerProcessor extends AudioWorkletProcessor {
-
-    /* Code of the processor
-       ...
-    */
-
-    calculateMax(output) {
-        for (let i = 0; i < output.length; i++) {
-            this.max = Math.max(this.max, output[i]);
-        }
-        this.blockCount++;
-        if (this.blockCount >= COUNT_BLOCK) {
-            this.port.postMessage({volume: this.max});
-            this.max = 0;
-            this.blockCount = 0;
-        }
-    }
-
-    process(inputs, outputs, parameters) {
-
-        /* Process Audio
-           ...
-        */
-
-        this.calculateMax(output[0]);
-        return true;
-    }
-}
-</code>
-</pre>
-        <p>
-            For each 8 quantum blocks of the render process method, we check the maximum value of the output array.
-            Then we send to the host the max value from all the audio with a <b>postMessage</b>.
-        </p>
-        <p>
-            Then in the host we will retrieve the value of the max.
+            To make our host communicates with the plugin, we will use the
+            <a target="_blank" href="https://github.com/webaudiomodules/sdk">SDK</a> of Web Audio Modules.
+            You can either download the full source and build it on your own, or use the pre-build version.
         </p>
 
-        <h3 class="ui dividing header" id="receive">
-            Receive volume in host :
+        <h3 class="ui dividing header" id="connection">
+            Connection of the plugins :
         </h3>
 <pre class="line-numbers">
 <code class="language-js">// index.js
 
-const vuMeterCanvas = document.getElementById("canvas2");
-
 (async () => {
+    ...
 
-    const vuMeter = new VuMeter(vuMeterCanvas, 30, 200);
+    let gain = audioCtx.createGain();
 
-    /* Code of the host
-       ...
-    */
+    let keyboardInstance = await WAM1.createInstance(hostGroupId, audioCtx);
+    let keyboardDom = await keyboardInstance.createGui();
 
-    node.port.onmessage = ev => {
-        let vol = 0;
-        let sensitivity = 1.3;
-        if (ev.data.volume) {
-            vol = ev.data.volume;
-        }
-        vuMeter.update(Math.abs(vol) * sensitivity);
-    }
+    let obxdInstance = await WAM2.createInstance(hostGroupId, audioCtx);
+    let pluginDom2 = await obxdInstance.createGui();
 
+    obxdInstance.audioNode.connect(gain).connect(audioCtx.destination);
+    obxdInstance.audioNode.connect(keyboardInstance.audioNode);
+    keyboardInstance.audioNode.connectEvents(obxdInstance.instanceId);
+
+    ...
 })();
 </code>
 </pre>
         <p>
-            After creating the vuMeter, we can receive data from the processor using the audio node.
+            In order to make sound with the OBXD synthesizer, we have to create a gain node.
+            This gain node is connected to the output destination, and receive in output the sound from the synthesizer.
+            The input of the obxd synthesizer is connected to the keyboard. Then, thanks to WAM, we can add to the synthesizer,
+            the event handler of midi events with the <b>connectEvents</b> method.
         </p>
 
         <h3 class="ui dividing header" id="conclusion">
             Conclusion :
         </h3>
         <p>
-            We've seen how to get information from the processor in the host. We created a simple vu meter,
-            but we can imagine any other implementation where we need to get information about the processor. For instance,
-            making a playhead cursor for the host.
+            We've seen how to connect a keyboard to a synthesizer with Web Audio Modules.
+        </p>
+        <p>
+            In a next step, we will see how to create a piano roll, and how to store the wam midi events.
         </p>
     </section>
 </div>
@@ -294,7 +213,7 @@ const vuMeterCanvas = document.getElementById("canvas2");
             </div>
         </div>
         <div class="ui section divider"></div>
-        <img src="/assets/images/wam-logo.png" class="ui centered mini image">
+        <img src="/public/assets/images/wam-logo.png" class="ui centered mini image">
         <div class="ui horizontal small divided link list">
             <a class="item" href="https://github.com/webaudiomodules/wam-examples/blob/master/LICENSE" target="_blank">Free
                 &amp; Open Source (MIT)</a>
@@ -302,14 +221,7 @@ const vuMeterCanvas = document.getElementById("canvas2");
     </div>
 </div>
 
-
-
 <script src="./index.js" type="module"></script>
-<script src="../lib/prism/prism.js"></script>
-<script>
-    $('.ui.sidebar')
-        // .sidebar('toggle');
-    ;
-</script>
+<script src="https://cdn.jsdelivr.net/combine/npm/prismjs@1.29.0,npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 </body>
 </html>
