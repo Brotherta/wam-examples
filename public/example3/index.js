@@ -1,7 +1,7 @@
 import {drawBuffer, Playhead} from "../lib/utils/drawer.js";
 
 const audioUrl = "../assets/audio/Guitar.mp3";
-const plugin1Url = "https://mainline.i3s.unice.fr/wam2/packages/StonePhaserStereo/index.js";
+const plugin1Url = "../node_modules/burns-audio-wam/dist/plugins/lfo/index.js";
 const plugin2Url = "https://mainline.i3s.unice.fr/wam2/packages/BigMuff/index.js";
 
 const btnStart = document.getElementById("btn-start");

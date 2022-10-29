@@ -3,8 +3,9 @@ import VuMeter from "../lib/utils/vu-meter.js";
 const plugin1Url = "../node_modules/burns-audio-wam/dist/plugins/pianoroll/index.js";
 const plugin2Url = "https://mainline.i3s.unice.fr/wam2/packages/obxd/index.js";
 
-export let audioCtx;
+let audioCtx;
 
+const btnStart = document.getElementById("btn-start");
 const vuMeterCanvas = document.getElementById("canvas2");
 const btnStartDemo = document.getElementById("btn-start-demo");
 const demoDiv = document.getElementById("demo-div");
@@ -30,44 +31,28 @@ async function startHost () {
     const {default: initializeWamHost} = await import("../lib/sdk/initializeWamHost.js");
     const [hostGroupId] = await initializeWamHost(audioCtx);
 
-    // Import our custom WAM Processor and the plugins.
-    const {default: MyWam} = await import("./my-wam.js");
     const {default: WAM1} = await import(plugin1Url);
     const {default: WAM2} = await import(plugin2Url);
-
-    /**
-     * Create an instance of our Processor. We can get from the instance the audio node.
-     * @type {WebAudioModule<WamNode>}
-     */
-    let wamInstance = await MyWam.createInstance(hostGroupId, audioCtx);
-    /** @type {import("./audio-player-node.js").default} */
-    let node = wamInstance.audioNode;
 
     /**
      * Create the Instance of the WAM plugins.
      * @type {Promise<IWebAudioModule<*>>|Promise<WebAudioModule<WamNode>>|*}
      */
     let gain = audioCtx.createGain();
-
+    /**
+     * @type {WamNode}
+     */
     let keyboardInstance = await WAM1.createInstance(hostGroupId, audioCtx);
     let keyboardDom = await keyboardInstance.createGui();
-
+    /**
+     * @type {WamNode} 
+     */
     let obxdInstance = await WAM2.createInstance(hostGroupId, audioCtx);
     let pluginDom2 = await obxdInstance.createGui();
 
-    gain.connect(node);
     obxdInstance.audioNode.connect(gain).connect(audioCtx.destination);
     obxdInstance.audioNode.connect(keyboardInstance.audioNode);
     keyboardInstance.audioNode.connectEvents(obxdInstance.instanceId);
-
-    node.port.onmessage = ev => {
-        let vol = 0;
-        let sensitivity = 1.8;
-        if (ev.data.volume) {
-            vol = ev.data.volume;
-        }
-        vuMeter.update(Math.abs(vol) * sensitivity);
-    }
 
     /**
      * Mount the plugins to the host.
@@ -81,8 +66,25 @@ async function startHost () {
     mount2.innerHTML = "";
     await mount2.appendChild(pluginDom2);
 
-    node.port.postMessage({ready: true});
-    await audioCtx.resume();
+    btnStart.onclick = () => {
+        if (audioCtx.state === "running") {
+            audioCtx.suspend();
+            btnStart.textContent = "Start";
+        } else {
+            audioCtx.resume();
+            btnStart.textContent = "Stop";
+            keyboardInstance.audioNode.scheduleEvents({
+                type: 'wam-transport', data: {
+                    playing: true,
+                    timeSigDenominator: 4,
+                    timeSigNumerator: 4,
+                    currentBar: 0,
+                    currentBarStarted: audioCtx.currentTime,
+                    tempo: 120
+                }
+            })
+        }
+    }
     loadingWheelDiv.style.display = "none";
     widgetLoadingDiv.style.display = "";
 }
