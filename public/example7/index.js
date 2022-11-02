@@ -25,7 +25,6 @@ async function startHost () {
     audioCtx = new AudioContext();
     await audioCtx.suspend();
 
-    const vuMeter = new VuMeter(vuMeterCanvas, 30, 200);
     /* Import from the Web Audio Modules 2.0 SDK to initialize Wam Host.
     It initializes a unique ID for the current AudioContext. */
     const {default: initializeWamHost} = await import("../lib/sdk/initializeWamHost.js");
@@ -54,6 +53,9 @@ async function startHost () {
     obxdInstance.audioNode.connect(keyboardInstance.audioNode);
     keyboardInstance.audioNode.connectEvents(obxdInstance.instanceId);
 
+    obxdInstance.audioNode.port.onmessage = (ev) => {
+        console.log(ev);
+    }
     /**
      * Mount the plugins to the host.
      * @type {Element}
@@ -73,6 +75,7 @@ async function startHost () {
         } else {
             audioCtx.resume();
             btnStart.textContent = "Stop";
+            keyboardInstance.audioNode.port.postMessage({action: "play", id:"qede"});
             keyboardInstance.audioNode.scheduleEvents({
                 type: 'wam-transport', data: {
                     playing: true,
