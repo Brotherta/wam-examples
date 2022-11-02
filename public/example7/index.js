@@ -75,7 +75,7 @@ async function startHost () {
         } else {
             audioCtx.resume();
             btnStart.textContent = "Stop";
-            keyboardInstance.audioNode.port.postMessage({action: "play", id:"qede"});
+            
             keyboardInstance.audioNode.scheduleEvents({
                 type: 'wam-transport', data: {
                     playing: true,

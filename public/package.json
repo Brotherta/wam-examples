@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/Brotherta/wam-examples#readme",
   "dependencies": {
-    "burns-audio-wam": "^0.2.28"
+    "burns-audio-wam": "^0.2.30"
   }
 }
