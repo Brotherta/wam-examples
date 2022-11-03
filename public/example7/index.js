@@ -53,9 +53,6 @@ async function startHost () {
     obxdInstance.audioNode.connect(keyboardInstance.audioNode);
     keyboardInstance.audioNode.connectEvents(obxdInstance.instanceId);
 
-    obxdInstance.audioNode.port.onmessage = (ev) => {
-        console.log(ev);
-    }
     /**
      * Mount the plugins to the host.
      * @type {Element}

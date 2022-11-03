@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Example 7 : Simple MIDI Piano Roll</title>
+    <title>Example 7 : Pianoroll using transport events</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/wam-logo.png">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.0/dist/semantic.min.css">
@@ -79,13 +79,22 @@
         <a class="item" href="../example5/index.html#receive">Receive data from the host</a>
         <a class="item" href="../example5/index.html#conclusion">Conclusion</a>
     </div>
-    <a id="example6" class="item active">Example 6</a>
+    <a href="../example6/index.html" class="item">Example 6</a>
     <div class="menu">
         <a class="item" href="#demo">Demo</a>
         <a class="item" href="#specifications">Specifications</a>
         <a class="item" href="#prerequisites">Prerequisites</a>
         <a class="item" href="#connection">Connection to MIDI</a>
         <a class="item" href="#conclusion">Conclusion</a>
+    </div>
+    <a class="item active">Example 7</a>
+    <div class="menu">
+        <a class="item" href="../example7/index.html#demo">Demo</a>
+        <a class="item" href="../example7/index.html#specifications">Specifications</a>
+        <a class="item" href="../example7/index.html#prerequisites">Prerequisites</a>
+        <a class="item" href="../example7/index.html#connection">Connection of the plugins</a>
+        <a class="item" href="../example7/index.html#transport">Sending data with wam-transport</a>
+        <a class="item" href="../example7/index.html#conclusion">Conclusion</a>
     </div>
     <div class="item">
         <a class="ui logo icon image" href="https://github.com/Brotherta/wam-examples">
@@ -99,7 +108,7 @@
 
 <div class="example-container">
     <h2 id="demo" class="ui dividing header">
-        Example : Simple MIDI Keyboard
+        Example : Pianoroll using transport events
     </h2>
 
     <button id="btn-start-demo" class="ui button">Start Demo</button>
@@ -109,19 +118,15 @@
             <img id="loading-gif" src="../assets/images/circle-loading.gif" alt="loading">
         </div>
 
-        <div class="demo-controls">
-            <button id="btn-start" class="ui button">Start</button>
-        </div>
-
         <div id="widget-loading" style="display: none">
             <div class="synth">
                 <div id="mount2"></div>
             </div>
-            <div class="keyboard">
-                <div id="mount1"></div>
+            <div class="demo-controls">
+                <button id="btn-start" class="ui button">Start</button>
             </div>
-            <div class="vu-meter">
-                <canvas id="canvas2"></canvas>
+            <div class="pianoroll">
+                <div id="mount1"></div>
             </div>
         </div>
     </div>
@@ -131,19 +136,15 @@
             Specifications :
         </h3>
         <p>
-            Thanks to WAM, we will easily host a simple MIDI virtual keyboard and use the OBXD synthesizer. See the MIDI
-            section in the <a target="_blank" href="https://github.com/webaudiomodules/api">wiki</a> of the Web Audio Modules.
+            We will need to use the Web Audio Modules SDK, to import and connect the piano roll to the synthesizer. As the example 6 with the simple MIDI Keyboard, we will instantiate the OBXD plugin and a piano roll.
         </p>
 
         <h3 class="ui dividing header" id="prerequisites">
             Prerequisites :
         </h3>
         <p>
-            To make our host communicates with the plugin, we will use the
-            <a target="_blank" href="https://github.com/webaudiomodules/sdk">SDK</a> of Web Audio Modules.
-            You can either download the full source and build it on your own, or use the pre-build version.
+            To make this example, we will use a Web Audio Modules plugin developed by <a href="https://github.com/boourns">Tom?</a>. You can find the code of the piano roll in his github's <a href="https://github.com/boourns/burns-audio-wam/tree/main/src/plugins/pianoroll/src">repository</a>.
         </p>
-
         <h3 class="ui dividing header" id="connection">
             Connection of the plugins :
         </h3>
@@ -170,20 +171,56 @@
 </code>
 </pre>
         <p>
-            In order to make sound with the OBXD synthesizer, we have to create a gain node.
-            This gain node is connected to the output destination, and receive in output the sound from the synthesizer.
-            The input of the obxd synthesizer is connected to the keyboard. Then, thanks to WAM, we can add to the synthesizer,
-            the event handler of midi events with the <b>connectEvents</b> method.
+            As in the previous example, the connection between the keyboard and the synthesizer is similar. As the piano roll will send to the synthesizer MIDI events, we need to connect the plugins for handling this type of event.
+        </p>
+
+        <h1 id="transport" class="ui dividing header">
+            Sending custom data to the processor with wam-transport :
+        </h1>
+<pre class="line-numbers">
+<code class="language-js">// index.js
+
+(async () => {
+    ...
+
+    btnStart.onclick = () => {
+        if (audioCtx.state === "running") {
+            audioCtx.suspend();
+            btnStart.textContent = "Start";
+        } else {
+            audioCtx.resume();
+            btnStart.textContent = "Stop";
+            
+            keyboardInstance.audioNode.scheduleEvents({
+                type: 'wam-transport', data: {
+                    playing: true,
+                    timeSigDenominator: 4,
+                    timeSigNumerator: 4,
+                    currentBar: 0,
+                    currentBarStarted: audioCtx.currentTime,
+                    tempo: 120
+                }
+            })
+        }
+    }
+
+    ...
+})();
+</code>
+</pre>
+
+        <p>
+            Whenever you need to send custom data to your processor, you can use the special type events <code>wam-transport</code>. The piano roll uses special information to work as: if it's currently playing or not, the time signature, the note bar of the piano roll, the tempo, and the current audio context time. That's all, we are ready to use the plugin in our application.
         </p>
 
         <h3 class="ui dividing header" id="conclusion">
             Conclusion :
         </h3>
         <p>
-            We've seen how to connect a keyboard to a synthesizer with Web Audio Modules.
+            We've seen how to easily build an application that uses special events for the piano roll.
         </p>
         <p>
-            In a next step, we will see how to create a piano roll, and how to store the wam midi events.
+            Special thanks to Tom? that helped me to create this example with his piano roll.
         </p>
     </section>
 </div>
